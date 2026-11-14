@@ -1,5 +1,3 @@
-# dot-vehicle
-
 Vehicles for Godot 4: a catalogue of definitions, handling as layered configuration, seats as data, and a safe handover when a player gets in or out. Add it when players should be able to drive somewhere rather than only walk.
 
 ## Install
