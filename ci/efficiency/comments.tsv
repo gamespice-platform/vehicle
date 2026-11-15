@@ -21,9 +21,8 @@ addons/dot_vehicle/runtime/dot_vehicle_driver.gd::long_block	11
 addons/dot_vehicle/runtime/dot_vehicle_hover.gd::long_block	3
 addons/dot_vehicle/runtime/dot_vehicle_ride.gd::banner	3
 addons/dot_vehicle/runtime/dot_vehicle_ride.gd::long_block	11
-addons/dot_vehicle/runtime/dot_vehicle_spawner.gd::banner	5
-addons/dot_vehicle/runtime/dot_vehicle_spawner.gd::long_block	13
+addons/dot_vehicle/runtime/dot_vehicle_spawner.gd::long_block	10
 addons/dot_vehicle/runtime/dot_vehicle_wheeled.gd::long_block	7
-examples/vehicle_selftest.gd::banner	7
-examples/vehicle_selftest.gd::long_block	8
+examples/vehicle_selftest.gd::banner	5
+examples/vehicle_selftest.gd::long_block	5
 fixtures/reverse_chassis.gd::long_block	1
