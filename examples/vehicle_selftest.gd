@@ -15,13 +15,13 @@ extends "res://examples/vehicle_selftest_damage.gd"
 
 const DriverTests := preload("vehicle_selftest_driver.gd")
 
-const CHECKS := 221
+const CHECKS := 231
 
 ## Sections entered against sections that ran to their last line, and against this. A
 ## runtime error inside a section aborts that function and nothing says so; a section that
 ## bailed out early after a failed guard is counted as not finished on purpose. The CHECKS
 ## total is the other half — see docs/testing.md.
-const SECTIONS := 32
+const SECTIONS := 33
 
 
 func _ready() -> void:
@@ -40,6 +40,7 @@ func _run() -> void:
 	_test_seats()
 	_test_tunables()
 	_test_steering_falloff()
+	_test_road_profile()
 	_test_definitions()
 	_test_catalogue()
 	_test_commands()
@@ -170,6 +171,67 @@ func _test_steering_falloff() -> void:
 		tuning.steering_limit_at(200.0) >= at_speed,
 		"and it stops falling above the top speed",
 		"a vehicle off a cliff would otherwise land unsteerable"
+	)
+	_done()
+
+
+## [DotRoadProfile]: a camber of 0 is the plain banked deck to the last bit, a crown falls
+## both ways on a straight, and a bank as steep as the camber swallows it.
+func _test_road_profile() -> void:
+	_section("road profile")
+
+	var half := 5.0
+	var flat_same := true
+
+	for deg: float in [-12.0, -3.0, 0.0, 0.5, 7.0, 12.0]:
+		var e := DotRoadProfile.bank_slope_of(deg)
+		for side: float in [-1.0, 1.0]:
+			var before := -side * tan(deg_to_rad(deg)) * half
+			flat_same = flat_same and is_equal_approx(DotRoadProfile.height_at(side * half, e, 0.0), before)
+		flat_same = flat_same and not DotRoadProfile.crowned(e, 0.0)
+		flat_same = flat_same and DotRoadProfile.cross_section(-half, half, e, 0.0).size() == 2
+
+	_check(flat_same, "a camber of 0 is the banked deck there was, with no crown vertex")
+
+	var c := DotRoadProfile.camber_slope_of(2.0)
+	_check(is_equal_approx(c, 0.02), "a camber is given in percent")
+	_check(
+		is_equal_approx(DotRoadProfile.height_at(-half, 0.0, c), -0.1)
+			and is_equal_approx(DotRoadProfile.height_at(half, 0.0, c), -0.1),
+		"a 2% crown on a straight drops both edges of a 10 m road by 10 cm",
+		"%.3f / %.3f" % [DotRoadProfile.height_at(-half, 0.0, c), DotRoadProfile.height_at(half, 0.0, c)]
+	)
+	_check(DotRoadProfile.height_at(0.0, 0.0, c) == 0.0, "and leaves the centreline where it was")
+
+	var section := DotRoadProfile.cross_section(-half, half, 0.0, c)
+	_check(section.size() == 3 and section[1] == Vector2.ZERO, "so the deck has a crown vertex on the centreline")
+	_check(
+		DotRoadProfile.cross_section(0.5, half, 0.0, c).size() == 2,
+		"but not on a strip that does not reach the centreline (a washout's kept side)"
+	)
+
+	var steep := DotRoadProfile.bank_slope_of(6.0)
+	_check(
+		not DotRoadProfile.crowned(steep, c) and not DotRoadProfile.crowned(-steep, c)
+			and is_equal_approx(DotRoadProfile.height_at(-half, steep, c), steep * half),
+		"a bank steeper than the camber is the plain banked deck"
+	)
+
+	# The runout: halfway to the camber the high half is level, the low half keeps the crown.
+	var mid := DotRoadProfile.half_slopes(c * 0.5, c)
+	var mid_left := DotRoadProfile.half_slopes(-c * 0.5, c)
+	_check(
+		is_zero_approx(mid.x) and is_equal_approx(mid.y, c) and is_zero_approx(mid_left.y) and is_equal_approx(mid_left.x, -c),
+		"half a camber's bank levels the high half and keeps the low half's fall, either way round",
+		"%s %s" % [mid, mid_left]
+	)
+
+	var big := DotRoadProfile.half_slopes(0.0, 0.5)
+	_check(is_equal_approx(big.y, 0.5) and is_equal_approx(big.x, -0.5), "and no camber is too steep to draw as asked")
+	_check(
+		DotRoadProfile.check_camber(-0.01) != "" and DotRoadProfile.check_camber(NAN) != ""
+			and DotRoadProfile.check_camber(INF) != "" and DotRoadProfile.check_camber(0.0) == "",
+		"a negative or non-finite camber is refused by name"
 	)
 	_done()
 

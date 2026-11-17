@@ -18,7 +18,7 @@ Read the family [CLAUDE.md](../../CLAUDE.md) first; this file is only what is sp
 
 | Path | What |
 | --- | --- |
-| `addons/dot_vehicle/core/` | `DotVehicleDef` (checkable without a scene), `DotVehicleCatalogue` (JSON an operator edits), `DotVehicleSeat`, `DotVehicleTunables` (a `DotConfig`), `DotVehicleCommand` (one tick of intent), `DotVehicleInstance`, `DotVehicleDamage` (what has come off, as data) |
+| `addons/dot_vehicle/core/` | `DotVehicleDef` (checkable without a scene), `DotVehicleCatalogue` (JSON an operator edits), `DotVehicleSeat`, `DotVehicleTunables` (a `DotConfig`), `DotVehicleCommand` (one tick of intent), `DotVehicleInstance`, `DotVehicleDamage` (what has come off, as data), `DotRoadProfile` (a road deck's cross-section: bank and camber, for a game that builds its own road mesh) |
 | `addons/dot_vehicle/runtime/` | `DotVehicleSpawner` (the node a game adds; owns the ride), `DotVehicleRide` (the handover), `DotVehicleChassis` (the subclass point), `DotVehicleWheeled`, `DotVehicleHover`, `DotVehicleDriver`, `DotVehicleBreakage` (hits, burst tyres, lost wheels, parts thrown), `DotVehicleDebris` (the budgeted loose pieces), `DotVehicleWreck` (a crash: tumble, parts torn off by every knock, an explosion event, smoke and fire that follow the damage), `DotVehicleExplosion` (the fireball, drawn) |
 | `addons/dot_vehicle/net/` | `DotVehicleNetSync`: what replicates, as strings; never names dot-net |
 | `fixtures/` | scenes and a chassis-by-path for the suite |
@@ -58,6 +58,7 @@ Read the family [CLAUDE.md](../../CLAUDE.md) first; this file is only what is sp
 | How something that is not a person drives | `DotVehicleDriver`, on `DotVehicleInstance.autopilot` |
 | How hard a driver corners, and when it gives up | `DotVehicleDriver.corner_slowdown` / `stuck_time` / `reverse_time` / `waypoint_radius` |
 | What a vehicle is | `DotVehicleDef` in a `DotVehicleCatalogue` |
+| Where a road deck stands across its width (bank, camber) | `DotRoadProfile.cross_section` / `height_at`; a camber of 0 is the plain banked deck |
 | How it handles | `DotVehicleTunables`, layered like every `DotConfig` (`handbrake_grip_fraction` for a handbrake slide) |
 | Whether back brakes before it reverses | `DotVehicleCommand.brake_then_reverse()` in the game's key mapping |
 | A kind that behaves differently | `DotVehicleChassis` subclass, named by path (`chassis_script_path`) |
