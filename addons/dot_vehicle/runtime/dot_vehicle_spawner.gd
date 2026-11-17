@@ -279,7 +279,7 @@ func spawn(
 ## in terms of this rather than the two being kept in step by hand.
 ##
 ## [b]The budget and the cooldown are still checked.[/b] A host with its own budget is
-## welcome to have one — playground does — but a vehicle registered here still occupies
+## welcome to have one — playlot does — but a vehicle registered here still occupies
 ## a seat in this spawner's world count, and skipping [method may_spawn] would make
 ## [member world_budget] a number that silently means nothing on exactly the deployment
 ## this method exists for.
