@@ -409,7 +409,7 @@ func _test_adopting() -> void:
 		"two chassis over one rigid body is twice the engine force, silently"
 	)
 
-	# The half that only fails on the deployment this exists for: dot-props frees the
+	# The half that only fails on the deployment this exists for: GameSpice Props frees the
 	# node from its own undo stack, so this spawner must not free it as well.
 	spawner.remove(jeep.instance_id)
 	_check(is_instance_valid(body), "removing an adopted vehicle leaves its node alone")

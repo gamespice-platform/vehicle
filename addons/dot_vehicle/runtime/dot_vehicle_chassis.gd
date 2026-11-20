@@ -11,7 +11,7 @@ extends RefCounted
 ## which is the cheap way to ship vehicles.
 ##
 ## [b]A delivered chassis extends this by PATH, never by name.[/b] A script inside a
-## mounted dot-cloud pack cannot resolve a [code]class_name[/code] —
+## mounted GameSpice Cloud pack cannot resolve a [code]class_name[/code] —
 ## [code]extends "res://addons/dot_vehicle/runtime/dot_vehicle_chassis.gd"[/code] works
 ## in a build and in a pack, and [code]extends DotVehicleChassis[/code] works in a build
 ## only.
@@ -47,7 +47,7 @@ func bind(p_vehicle: DotVehicleInstance, p_tunables: DotVehicleTunables) -> DotR
 ## Writes the tunables onto the body. Called once, before [method _setup].
 ##
 ## [b]Onto the body, never left to whatever the scene was saved with.[/b] This is
-## dot-props' mass bug, which cost a night: a catalogue that says 900 kg over a scene
+## GameSpice Props' mass bug, which cost a night: a catalogue that says 900 kg over a scene
 ## saved at 20 kg gives a vehicle a physics gun refuses for being too heavy and a
 ## gravity gun throws like a beach ball, with nothing erroring either way.
 func apply_body() -> void:

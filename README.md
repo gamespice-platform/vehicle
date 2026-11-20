@@ -5,9 +5,9 @@ Vehicles for Godot 4: a catalogue of definitions, handling as layered configurat
 ## Install
 
 1. Get [Godot 4.7](https://godotengine.org/download).
-2. Either use [dot-bootstrap](https://github.com/gamespice-platform/bootstrap), which clones every project and links the addons, or copy `addons/dot_vehicle/` and [dot-core](https://github.com/gamespice-platform/core)'s `addons/dot_core/` into your project and enable dot-vehicle in *Project > Project Settings > Plugins*.
+2. Either use [GameSpice Bootstrap](https://github.com/gamespice-platform/bootstrap), which clones every project and links the addons, or copy `addons/dot_vehicle/` and [GameSpice Core](https://github.com/gamespice-platform/core)'s `addons/dot_core/` into your project and enable dot-vehicle in *Project > Project Settings > Plugins*.
 
-dot-core is the only dependency.
+GameSpice Core is the only dependency.
 
 ## Use
 
@@ -62,8 +62,8 @@ Rigid-body physics is not identical on two machines, so the server simulates veh
 | --- | --- |
 | `WHEELED` | Godot's `VehicleBody3D` with the tunables written onto its wheels. |
 | `HOVER` | Raycast suspension on a plain `RigidBody3D`: hovercraft, skiff, barge. |
-| `CUSTOM` | Your game drives it; dot-vehicle keeps the seats and bookkeeping. |
-| Your own | A `DotVehicleChassis` subclass, named by path so a dot-cloud pack can deliver it. |
+| `CUSTOM` | Your game drives it; GameSpice Vehicle keeps the seats and bookkeeping. |
+| Your own | A `DotVehicleChassis` subclass, named by path so a GameSpice Cloud pack can deliver it. |
 
 Godot's `VehicleBody3D` drives along +Z for a positive `engine_force` and turns left for a positive `steering`. `DotVehicleCommand` uses the family's usual conventions and `DotVehicleWheeled` does the translation, so games never have to.
 
@@ -79,7 +79,7 @@ driver.set_route(PackedVector3Array([checkpoint_a, checkpoint_b, depot]))
 jeep.autopilot = driver          # the spawner's tick drives it from here
 ```
 
-It steers in the vehicle's own frame, brakes for corners, slows towards the last waypoint, and reverses out when stuck. It does not plan routes; they come from dot-npc's graph, a spline or a config file. A person in the driving seat always wins.
+It steers in the vehicle's own frame, brakes for corners, slows towards the last waypoint, and reverses out when stuck. It does not plan routes; they come from GameSpice NPC's graph, a spline or a config file. A person in the driving seat always wins.
 
 ## Testing
 

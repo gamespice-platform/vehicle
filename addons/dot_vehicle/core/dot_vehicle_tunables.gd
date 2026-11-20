@@ -11,7 +11,7 @@ extends DotConfig
 ## else here: exported defaults < JSON file < environment < command line.
 ##
 ## [b]Applied ONTO the body, never left to whatever the scene was saved with.[/b] This
-## is dot-props' mass bug, which cost a night: a catalogue saying 900 kg over a scene
+## is GameSpice Props' mass bug, which cost a night: a catalogue saying 900 kg over a scene
 ## saved at 20 kg gives a prop a physics gun refuses for being too heavy and a gravity
 ## gun throws like a beach ball. A vehicle has a dozen such numbers and one scene is
 ## routinely shared by several definitions, so it would be that bug twelve times.

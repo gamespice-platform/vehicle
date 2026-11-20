@@ -1,10 +1,10 @@
-# dot-vehicle
+# GameSpice Vehicle
 
 **Vehicles a game can drive, ride in and shoot from.** A catalogue of definitions, handling as layered configuration, seats as data, the handover between a player and a vehicle, two chassis (Godot's raycast `VehicleBody3D` and our own hover), a bot driver, and what replicates.
 
 Read the family [CLAUDE.md](../../CLAUDE.md) first; this file is only what is specific to vehicles. The reasoning is in [docs/](docs/).
 
-**Depends on dot-core and nothing else.** Not dot-player-controller, dot-net or dot-combat: each is a seam the host wires, and naming any of them would make this addon fail to parse in a project that does not have it.
+**Depends on GameSpice Core and nothing else.** Not GameSpice Player Controller, GameSpice Net or GameSpice Combat: each is a seam the host wires, and naming any of them would make this addon fail to parse in a project that does not have it.
 
 ## Read before
 
@@ -20,7 +20,7 @@ Read the family [CLAUDE.md](../../CLAUDE.md) first; this file is only what is sp
 | --- | --- |
 | `addons/dot_vehicle/core/` | `DotVehicleDef` (checkable without a scene), `DotVehicleCatalogue` (JSON an operator edits), `DotVehicleSeat`, `DotVehicleTunables` (a `DotConfig`), `DotVehicleCommand` (one tick of intent), `DotVehicleInstance`, `DotVehicleDamage` (what has come off, as data), `DotRoadProfile` (a road deck's cross-section: bank and camber, for a game that builds its own road mesh) |
 | `addons/dot_vehicle/runtime/` | `DotVehicleSpawner` (the node a game adds; owns the ride), `DotVehicleRide` (the handover), `DotVehicleChassis` (the subclass point), `DotVehicleWheeled`, `DotVehicleHover`, `DotVehicleDriver`, `DotVehicleBreakage` (hits, burst tyres, lost wheels, parts thrown), `DotVehicleDebris` (the budgeted loose pieces), `DotVehicleWreck` (a crash: tumble, parts torn off by every knock, an explosion event, smoke and fire that follow the damage), `DotVehicleExplosion` (the fireball, drawn) |
-| `addons/dot_vehicle/net/` | `DotVehicleNetSync`: what replicates, as strings; never names dot-net |
+| `addons/dot_vehicle/net/` | `DotVehicleNetSync`: what replicates, as strings; never names GameSpice Net |
 | `fixtures/` | scenes and a chassis-by-path for the suite |
 | `examples/vehicle_selftest.tscn` | the suite; real bodies through real physics frames |
 

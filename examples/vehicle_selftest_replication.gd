@@ -71,7 +71,7 @@ func _test_net_sync() -> void:
 	_done()
 
 
-## The receiving half of a replication, without dot-net in the project.
+## The receiving half of a replication, without GameSpice Net in the project.
 class _NetProbe:
 	extends RefCounted
 
@@ -125,7 +125,7 @@ func _test_rider_freed_aboard() -> void:
 
 
 ## Every file that asks the physics space a question. A new one fails here until it is added and
-## listed in dot-physics docs/threading.md, because with physics on its own thread each caller
+## listed in GameSpice Physics docs/threading.md, because with physics on its own thread each caller
 ## must run inside the physics step.
 const QUERY_FILES: Array[String] = ["runtime/dot_vehicle_hover.gd", "runtime/dot_vehicle_ride.gd"]
 const QUERY_NEEDLES: Array[String] = ["direct_space_state", "space.intersect_", "space.cast_motion(", "space.get_rest_info("]

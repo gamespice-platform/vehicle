@@ -27,7 +27,7 @@ The exclusions on that sweep are the subtle half: the vehicle **and everybody in
 
 ## A disconnect does not remove the vehicle
 
-The opposite of dot-props' default, deliberately. A prop is a thing somebody built; a vehicle is a thing somebody parked, usually with other people in it. Removing it when the driver disconnects deletes the car three passengers are riding in. It is *disowned* instead, so a departed player's budget is not held for ever; `clean_up_on_leave = true` is there for a server that wants the other rule.
+The opposite of GameSpice Props' default, deliberately. A prop is a thing somebody built; a vehicle is a thing somebody parked, usually with other people in it. Removing it when the driver disconnects deletes the car three passengers are riding in. It is *disowned* instead, so a departed player's budget is not held for ever; `clean_up_on_leave = true` is there for a server that wants the other rule.
 
 Destruction is the case where everybody **must** come out, and it forces the exit: a vehicle usually explodes somewhere awkward and there may be no room to stand. A rider left in a freed vehicle is a player parented to nothing: invisible, unkillable, unable to enter another vehicle for the rest of the round, with no error anywhere.
 
@@ -35,7 +35,7 @@ Destruction is the case where everybody **must** come out, and it forces the exi
 
 `DotVehicleInstance.chassis` holds the chassis and `DotVehicleChassis.vehicle` holds the vehicle back. Two `RefCounted`s referring to each other are **never freed** (GDScript has no cycle collector), so the pair outlives the spawner and takes the definition, the tunables, the seats and the last command with it.
 
-Clearing one end reads exactly like the fix and is half of it. And the path that leaks hardest never calls `remove` at all: **a game is torn down by freeing its nodes**. So `_unbind` clears both ends and the spawner's `_exit_tree` walks whatever is left. dot-npc's `DotNpcBrain.unbind` is the same shape for the same reason. **Any pair of `RefCounted`s in this family that refer to each other is a leak**, and the symptom is never a crash: it is a number in a suite's exit line that everybody has learned to read past.
+Clearing one end reads exactly like the fix and is half of it. And the path that leaks hardest never calls `remove` at all: **a game is torn down by freeing its nodes**. So `_unbind` clears both ends and the spawner's `_exit_tree` walks whatever is left. GameSpice NPC's `DotNpcBrain.unbind` is the same shape for the same reason. **Any pair of `RefCounted`s in this family that refer to each other is a leak**, and the symptom is never a crash: it is a number in a suite's exit line that everybody has learned to read past.
 
 ## `adopt()`, the second entry point
 

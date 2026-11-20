@@ -4,7 +4,7 @@ extends RefCounted
 ## Turns "go there" into a [DotVehicleCommand]. What lets something other than a
 ## person drive.
 ##
-## [b]The gap this fills.[/b] dot-vehicle has always said a command is built by the
+## [b]The gap this fills.[/b] GameSpice Vehicle has always said a command is built by the
 ## game "from a keyboard, a gamepad, a touch layout or a bot" — and shipped the first
 ## three shapes and nothing for the fourth. So a vehicle could be driven and could not
 ## be driven [i]by anything[/i]: no convoy, no chase, no NPC that gets in a car, no
@@ -25,7 +25,7 @@ extends RefCounted
 ## vehicle.chassis.drive(command, delta)
 ## [/codeblock]
 ##
-## [b]It does not path.[/b] Give it a route — from dot-npc's graph, from a spline a
+## [b]It does not path.[/b] Give it a route — from GameSpice NPC's graph, from a spline a
 ## level designer drew, from four points in a config file — and it follows it. Deciding
 ## where to go is a different problem and putting it here would make this addon depend
 ## on a navigation one.

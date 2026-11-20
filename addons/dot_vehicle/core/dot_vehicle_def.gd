@@ -10,8 +10,8 @@ extends Resource
 ## whether a player may have one must answer without loading any.
 ##
 ## [b]The chassis script is named by PATH, never by [code]class_name[/code].[/b] A
-## mounted dot-cloud pack arrives long after the project's script cache was built, so a
-## global class inside one resolves to nothing. This is the same rule dot-npc's brains
+## mounted GameSpice Cloud pack arrives long after the project's script cache was built, so a
+## global class inside one resolves to nothing. This is the same rule GameSpice NPC's brains
 ## and game-playlot's entities already follow.
 
 ## How a chassis behaves, when a game has not brought its own script.
@@ -23,7 +23,7 @@ enum Kind {
 	WHEELED,
 	## A body held above the ground by springs, steered by torque. Hovercraft, skiffs.
 	HOVER,
-	## Driven by the game entirely. dot-vehicle handles the seats and nothing else.
+	## Driven by the game entirely. GameSpice Vehicle handles the seats and nothing else.
 	CUSTOM,
 }
 
@@ -49,7 +49,7 @@ enum Kind {
 ## way to register one.
 @export var chassis_script_path: String = ""
 
-## The dot-cloud content id this vehicle lives in, or empty when it ships in the build.
+## The GameSpice Cloud content id this vehicle lives in, or empty when it ships in the build.
 @export var content_id: StringName = &""
 
 @export_group("Behaviour")

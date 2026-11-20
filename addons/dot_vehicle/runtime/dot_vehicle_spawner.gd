@@ -5,7 +5,7 @@ extends "dot_vehicle_lookup.gd"
 ## Spawns, drives, seats and removes vehicles. The node a game with vehicles adds.
 ##
 ## [b]Server-authoritative, and a vehicle is not predicted.[/b] The same decision
-## dot-props and dot-npc make, and here it costs the most: it is the [i]driver's own
+## GameSpice Props and GameSpice NPC make, and here it costs the most: it is the [i]driver's own
 ## input[/i] going round trip, which is exactly what prediction exists to hide.
 ##
 ## It was considered properly and rejected anyway. A vehicle is a rigid body with a
@@ -75,7 +75,7 @@ const META_ADOPTED := &"dot_vehicle_adopted"
 
 ## Whether a player's vehicles are removed when they leave.
 ##
-## [b]Off by default, and the opposite of dot-props'.[/b] A prop is a thing somebody
+## [b]Off by default, and the opposite of GameSpice Props'.[/b] A prop is a thing somebody
 ## built and a vehicle is a thing somebody parked, usually with other people in it —
 ## removing it when the driver disconnects deletes the car three passengers are riding
 ## in. A server that wants the other behaviour turns this on.
@@ -118,8 +118,8 @@ func _ready() -> void:
 
 ## One simulated tick: every vehicle applies the command it is holding.
 ##
-## Called by the game's simulation at the game's fixed rate, exactly as dot-npc's
-## spawner and dot-match are — so handling does not change with the frame rate and a
+## Called by the game's simulation at the game's fixed rate, exactly as GameSpice NPC's
+## spawner and GameSpice Match are — so handling does not change with the frame rate and a
 ## headless suite can drive a thousand ticks in no time at all.
 func tick(delta: float) -> void:
 	if not authoritative:
@@ -362,7 +362,7 @@ func _register(
 	var built := attach_chassis(vehicle)
 
 	if not built.ok:
-		# The vehicle still exists, for dot-npc's reason: deleting it would hide which
+		# The vehicle still exists, for GameSpice NPC's reason: deleting it would hide which
 		# scene was wrong. A car that will not drive is a thing an operator can see and
 		# name, and the warning beside it says what to fix.
 		DotLog.warn(CHANNEL, "a vehicle spawned without a chassis", {
@@ -448,7 +448,7 @@ func attach_chassis(vehicle: DotVehicleInstance) -> DotResult:
 			DotVehicleDef.Kind.HOVER:
 				chassis = DotVehicleHover.new()
 			DotVehicleDef.Kind.CUSTOM:
-				# Driven by the game entirely. dot-vehicle keeps the seats and the
+				# Driven by the game entirely. GameSpice Vehicle keeps the seats and the
 				# bookkeeping and touches nothing else, which is the whole meaning of
 				# the kind — so this is a success with no chassis, not a failure.
 				return DotResult.success(null)
@@ -638,7 +638,7 @@ func _unbind(vehicle: DotVehicleInstance) -> void:
 		return
 
 	if vehicle.chassis != null:
-		# Through `set`, because a chassis is typed [RefCounted] here: dot-vehicle's own
+		# Through `set`, because a chassis is typed [RefCounted] here: GameSpice Vehicle's own
 		# rule is that a delivered chassis extends this by PATH, so the property is not
 		# reachable by name on the static type.
 		vehicle.chassis.set("vehicle", null)

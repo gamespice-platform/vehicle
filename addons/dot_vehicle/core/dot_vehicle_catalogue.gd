@@ -47,7 +47,7 @@ func add(def: DotVehicleDef) -> DotResult:
 ## Download every pack this catalogue's vehicles live in.
 ##
 ## [b]Nothing used to fetch these.[/b] A DotVehicleDef has carried a `content_id` since it was
-## written and it is serialised onto the wire, but no code anywhere asked dot-cloud for
+## written and it is serialised onto the wire, but no code anywhere asked GameSpice Cloud for
 ## one — so a delivered vehicle was refused with "that vehicle's content is not loaded",
 ## forever, on a server that had configured it perfectly. The refusal is correct and
 ## that is what made it invisible: it reads as a missing pack rather than as a fetch

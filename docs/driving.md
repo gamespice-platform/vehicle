@@ -85,10 +85,10 @@ Debris is cosmetic on every machine. Thrown pieces are copies of the drawn node 
 ## Deliberately not here
 
 - **No prediction.** A decision, not a gap.
-- **No input.** A `DotVehicleCommand` is built by the game from a keyboard, a gamepad or a touch layout. dot-player-controller's sampler is the model, and naming it here would make this addon fail to parse without it. The bot case is `DotVehicleDriver`.
+- **No input.** A `DotVehicleCommand` is built by the game from a keyboard, a gamepad or a touch layout. GameSpice Player Controller's sampler is the model, and naming it here would make this addon fail to parse without it. The bot case is `DotVehicleDriver`.
 - **No pathfinding for the driver.**
 - **No camera.** A vehicle camera is a game's, and `on_seated` is where it moves.
-- **No damage model beyond a single health number.** Deformation, per-panel damage and wheels that come off are a game's; dot-combat is where a weapon lives.
+- **No damage model beyond a single health number.** Deformation, per-panel damage and wheels that come off are a game's; GameSpice Combat is where a weapon lives.
 - **No fuel, no gearbox, no engine audio.** Each is a game's, and each would be a number in `meta` rather than a fork.
 - **No shipped aircraft chassis.** Lift is not suspension and there is no ground to raycast at; an aircraft is a `DotVehicleChassis` subclass by path, as mg-smash-copter's is.
 - **No towing, no trailers, no vehicles carrying vehicles.** A joint between two rigid bodies is a physics problem the seats layer has nothing to say about.

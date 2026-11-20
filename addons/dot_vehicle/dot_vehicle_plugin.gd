@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-## Editor entry point for dot-vehicle. Registers inspector types only.
+## Editor entry point for GameSpice Vehicle. Registers inspector types only.
 ##
 ## No autoloads. A server running two worlds in one process holds two spawners, each
 ## with its own vehicle budget.

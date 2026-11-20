@@ -3,7 +3,7 @@ extends RefCounted
 
 ## What a vehicle has to tell every client, and how to get it there.
 ##
-## [b]dot-net is not a dependency and is not imported here.[/b] Only dot-core is a hard
+## [b]GameSpice Net is not a dependency and is not imported here.[/b] Only GameSpice Core is a hard
 ## dependency in this family, and a script that [i]mentions[/i] a [code]class_name[/code]
 ## the project does not have fails to parse. Types are named as strings and a bridge
 ## resolves them with [code]DotNetVar.Type[spec.type][/code].
@@ -16,10 +16,10 @@ extends RefCounted
 ## one place it would show, which is a vehicle nose-up.
 ##
 ## [b]One QUATERNION, not four INTs.[/b] It was four ten-bit integer components until
-## 2026-09-28, and dot-net's interpolator treats any int as discrete and switches it at
+## 2026-09-28, and GameSpice Net's interpolator treats any int as discrete and switches it at
 ## the midpoint, so every client drew the body snapping round at the snapshot rate while
 ## its position slid (game-playlot's headless_net: heading still on 26 of 31 turning
-## ticks, `[veh-heading-1]`). dot-net's own type slerps between snapshots and costs
+## ticks, `[veh-heading-1]`). GameSpice Net's own type slerps between snapshots and costs
 ## smallest-three at [code]DotNetConfig.rotation_bits[/code] (29 bits at the default 9,
 ## against 44).
 ##

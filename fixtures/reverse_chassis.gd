@@ -3,7 +3,7 @@ extends "res://addons/dot_vehicle/runtime/dot_vehicle_chassis.gd"
 ## A chassis for the self-test: drives backwards, and counts its ticks.
 ##
 ## [b]Extends a PATH, not [code]DotVehicleChassis[/code], and the suite asserts that
-## this file loads.[/b] It is the shape a chassis delivered inside a mounted dot-cloud
+## this file loads.[/b] It is the shape a chassis delivered inside a mounted GameSpice Cloud
 ## pack must have, and writing the fixture the other way would make the suite pass for
 ## a shape the addon does not support.
 
