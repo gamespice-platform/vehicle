@@ -10,7 +10,7 @@ const _ICON := "res://addons/dot_vehicle/icon_placeholder.svg"
 
 const _TYPES := [
 	[
-		"DotVehicleSpawner",
+		"GSVehicleSpawner",
 		"Node",
 		"res://addons/dot_vehicle/runtime/dot_vehicle_spawner.gd",
 	],

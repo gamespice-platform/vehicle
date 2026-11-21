@@ -10,17 +10,17 @@ Read the family [CLAUDE.md](../../CLAUDE.md) first; this file is only what is sp
 
 | Read | Before |
 | --- | --- |
-| [docs/handover.md](docs/handover.md) | `DotVehicleRide`, seats and exits, the spawner, catalogue checks, disconnect and destruction, unbinding, `adopt()` |
-| [docs/driving.md](docs/driving.md) | authority and replication, `DotVehicleWheeled` and Godot's signs, `DotVehicleHover`, a new chassis, the tunables, `DotVehicleDriver`, what is deliberately not here |
+| [docs/handover.md](docs/handover.md) | `GSVehicleRide`, seats and exits, the spawner, catalogue checks, disconnect and destruction, unbinding, `adopt()` |
+| [docs/driving.md](docs/driving.md) | authority and replication, `GSVehicleWheeled` and Godot's signs, `GSVehicleHover`, a new chassis, the tunables, `GSVehicleDriver`, what is deliberately not here |
 | [docs/history.md](docs/history.md) | the bugs, and how each looked |
 
 ## Layout
 
 | Path | What |
 | --- | --- |
-| `addons/dot_vehicle/core/` | `DotVehicleDef` (checkable without a scene), `DotVehicleCatalogue` (JSON an operator edits), `DotVehicleSeat`, `DotVehicleTunables` (a `DotConfig`), `DotVehicleCommand` (one tick of intent), `DotVehicleInstance`, `DotVehicleDamage` (what has come off, as data), `DotRoadProfile` (a road deck's cross-section: bank and camber, for a game that builds its own road mesh) |
-| `addons/dot_vehicle/runtime/` | `DotVehicleSpawner` (the node a game adds; owns the ride), `DotVehicleRide` (the handover), `DotVehicleChassis` (the subclass point), `DotVehicleWheeled`, `DotVehicleHover`, `DotVehicleDriver`, `DotVehicleBreakage` (hits, burst tyres, lost wheels, parts thrown), `DotVehicleDebris` (the budgeted loose pieces), `DotVehicleWreck` (a crash: tumble, parts torn off by every knock, an explosion event, smoke and fire that follow the damage), `DotVehicleExplosion` (the fireball, drawn) |
-| `addons/dot_vehicle/net/` | `DotVehicleNetSync`: what replicates, as strings; never names GameSpice Net |
+| `addons/dot_vehicle/core/` | `GSVehicleDef` (checkable without a scene), `GSVehicleCatalogue` (JSON an operator edits), `GSVehicleSeat`, `GSVehicleTunables` (a `GSConfig`), `GSVehicleCommand` (one tick of intent), `GSVehicleInstance`, `GSVehicleDamage` (what has come off, as data), `GSRoadProfile` (a road deck's cross-section: bank and camber, for a game that builds its own road mesh) |
+| `addons/dot_vehicle/runtime/` | `GSVehicleSpawner` (the node a game adds; owns the ride), `GSVehicleRide` (the handover), `GSVehicleChassis` (the subclass point), `GSVehicleWheeled`, `GSVehicleHover`, `GSVehicleDriver`, `GSVehicleBreakage` (hits, burst tyres, lost wheels, parts thrown), `GSVehicleDebris` (the budgeted loose pieces), `GSVehicleWreck` (a crash: tumble, parts torn off by every knock, an explosion event, smoke and fire that follow the damage), `GSVehicleExplosion` (the fireball, drawn) |
+| `addons/dot_vehicle/net/` | `GSVehicleNetSync`: what replicates, as strings; never names GameSpice Net |
 | `fixtures/` | scenes and a chassis-by-path for the suite |
 | `examples/vehicle_selftest.tscn` | the suite; real bodies through real physics frames |
 
@@ -36,44 +36,44 @@ Read the family [CLAUDE.md](../../CLAUDE.md) first; this file is only what is sp
 - Exits are a swept query over candidates in order, excluding the vehicle and every occupant, and refused when none is free. Never teleport the rider anyway. [handover](docs/handover.md#the-hard-part-is-not-the-driving-it-is-the-handover)
 - `occupants` maps seat id to rider id; iterate values for riders. [handover](docs/handover.md#the-hard-part-is-not-the-driving-it-is-the-handover)
 - `allow_exit_when_inverted` overrides `max_exit_speed`. [handover](docs/handover.md#the-hard-part-is-not-the-driving-it-is-the-handover)
-- One ride: assign callbacks to `spawner.ride`, never construct a second `DotVehicleRide`. [handover](docs/handover.md#one-ride-and-it-is-the-spawners)
+- One ride: assign callbacks to `spawner.ride`, never construct a second `GSVehicleRide`. [handover](docs/handover.md#one-ride-and-it-is-the-spawners)
 - Catalogue load refuses seats without exits, duplicate seat ids, no driving seat, a chassis named by `class_name`, and a wheeled kind without a `VehicleBody3D`. [handover](docs/handover.md#refused-early-at-catalogue-load)
 - A disconnect disowns, never removes; destruction forces every rider out. [handover](docs/handover.md#a-disconnect-does-not-remove-the-vehicle)
 - The vehicle/chassis pair is unbound at `remove` and at the spawner's `_exit_tree`; any `RefCounted` pair that refers both ways leaks. [handover](docs/handover.md#the-vehicle-and-its-chassis-point-at-each-other)
 - `adopt()` never places, reparents or frees the node, refuses a body that is already a vehicle, and still counts against the budget. [handover](docs/handover.md#adopt-the-second-entry-point)
 - Vehicles are server-authoritative and never predicted; a client smooths the interpolated transform. [driving](docs/driving.md#server-authoritative-and-not-predicted)
-- Brakes are newtons: `DotVehicleWheeled` writes `force × physics step / wheels`, because Godot reads a wheel's `brake` as an impulse per step; a subclass that sets `brake` itself multiplies by `step_seconds()`. The body's linear damping is `tunables.linear_damp` (REPLACE), never the project's. [driving](docs/driving.md#brakes-are-forces-and-godot-wants-an-impulse)
-- S that brakes and then reverses is `DotVehicleCommand.brake_then_reverse(forward_speed)`, called by the game's key mapping, never the chassis (a bot's reverse means reverse). [driving](docs/driving.md#one-key-to-brake-and-reverse)
+- Brakes are newtons: `GSVehicleWheeled` writes `force × physics step / wheels`, because Godot reads a wheel's `brake` as an impulse per step; a subclass that sets `brake` itself multiplies by `step_seconds()`. The body's linear damping is `tunables.linear_damp` (REPLACE), never the project's. [driving](docs/driving.md#brakes-are-forces-and-godot-wants-an-impulse)
+- S that brakes and then reverses is `GSVehicleCommand.brake_then_reverse(forward_speed)`, called by the game's key mapping, never the chassis (a bot's reverse means reverse). [driving](docs/driving.md#one-key-to-brake-and-reverse)
 - A handbrake slide is `handbrake_grip_fraction` (1.0 = none); a threshold, not a slope, and it lengthens the handbrake's straight stop. [driving](docs/driving.md#brakes-are-forces-and-godot-wants-an-impulse)
-- `DotVehicleCommand`: forward is -Z, +1 steers right. Only `DotVehicleWheeled` translates to Godot's signs, and it divides engine force across traction wheels. [driving](docs/driving.md#two-measured-facts-about-godots-vehicle)
-- A new kind of vehicle is a `DotVehicleChassis` subclass named by `chassis_script_path`, never a fork. [driving](docs/driving.md#why-godots-raycast-vehicle-is-used-rather-than-replaced)
-- Wear is not loss: a knock below a part's floor wears its health (`fatigue`) and a tyre's (`wear_rate`: less grip, a wobble, then flat) but takes nothing off; `wear` and `distress()` cross the wire in `to_dict`. A wreck's explosion is a `broke` event of kind `wrecked`; the game draws `DotVehicleExplosion.spawn` and throws its driver out.
-- Debris never touches anything driven (`DotVehicleDebris.collision_mask` is the road): rigid bodies differ between machines, so each peer throws its own from the server's list and velocities. A hit is a change of speed at a point, never a force, so one strength table serves a van and a tipper. [driving](docs/driving.md#parts-that-come-off)
+- `GSVehicleCommand`: forward is -Z, +1 steers right. Only `GSVehicleWheeled` translates to Godot's signs, and it divides engine force across traction wheels. [driving](docs/driving.md#two-measured-facts-about-godots-vehicle)
+- A new kind of vehicle is a `GSVehicleChassis` subclass named by `chassis_script_path`, never a fork. [driving](docs/driving.md#why-godots-raycast-vehicle-is-used-rather-than-replaced)
+- Wear is not loss: a knock below a part's floor wears its health (`fatigue`) and a tyre's (`wear_rate`: less grip, a wobble, then flat) but takes nothing off; `wear` and `distress()` cross the wire in `to_dict`. A wreck's explosion is a `broke` event of kind `wrecked`; the game draws `GSVehicleExplosion.spawn` and throws its driver out.
+- Debris never touches anything driven (`GSVehicleDebris.collision_mask` is the road): rigid bodies differ between machines, so each peer throws its own from the server's list and velocities. A hit is a change of speed at a point, never a force, so one strength table serves a van and a tipper. [driving](docs/driving.md#parts-that-come-off)
 - The bot driver steers in the vehicle's own basis, brakes for corners and on arrival, reverses out when stuck, and never paths; a person in the seat beats the autopilot. [driving](docs/driving.md#the-bot-driver)
 
 ## Where a game plugs in
 
 | To change | Where |
 | --- | --- |
-| How something that is not a person drives | `DotVehicleDriver`, on `DotVehicleInstance.autopilot` |
-| How hard a driver corners, and when it gives up | `DotVehicleDriver.corner_slowdown` / `stuck_time` / `reverse_time` / `waypoint_radius` |
-| What a vehicle is | `DotVehicleDef` in a `DotVehicleCatalogue` |
-| Where a road deck stands across its width (bank, camber) | `DotRoadProfile.cross_section` / `height_at`; a camber of 0 is the plain banked deck |
-| How it handles | `DotVehicleTunables`, layered like every `DotConfig` (`handbrake_grip_fraction` for a handbrake slide) |
-| Whether back brakes before it reverses | `DotVehicleCommand.brake_then_reverse()` in the game's key mapping |
-| A kind that behaves differently | `DotVehicleChassis` subclass, named by path (`chassis_script_path`) |
-| Where riders sit and where they get out | `DotVehicleSeat` |
+| How something that is not a person drives | `GSVehicleDriver`, on `GSVehicleInstance.autopilot` |
+| How hard a driver corners, and when it gives up | `GSVehicleDriver.corner_slowdown` / `stuck_time` / `reverse_time` / `waypoint_radius` |
+| What a vehicle is | `GSVehicleDef` in a `GSVehicleCatalogue` |
+| Where a road deck stands across its width (bank, camber) | `GSRoadProfile.cross_section` / `height_at`; a camber of 0 is the plain banked deck |
+| How it handles | `GSVehicleTunables`, layered like every `GSConfig` (`handbrake_grip_fraction` for a handbrake slide) |
+| Whether back brakes before it reverses | `GSVehicleCommand.brake_then_reverse()` in the game's key mapping |
+| A kind that behaves differently | `GSVehicleChassis` subclass, named by path (`chassis_script_path`) |
+| Where riders sit and where they get out | `GSVehicleSeat` |
 | What happens to a player who gets in | `spawner.ride.on_seated` / `on_unseated` |
-| Whether rider nodes are carried at all | `DotVehicleRide.carry_rider_nodes` |
-| What the exit sweep tests against | `DotVehicleRide.exit_mask` |
-| Where vehicles are added | `DotVehicleSpawner.world_ref`, a `DotNodeRef` |
-| A body something else already created | `DotVehicleSpawner.adopt()` |
+| Whether rider nodes are carried at all | `GSVehicleRide.carry_rider_nodes` |
+| What the exit sweep tests against | `GSVehicleRide.exit_mask` |
+| Where vehicles are added | `GSVehicleSpawner.world_ref`, a `GSNodeRef` |
+| A body something else already created | `GSVehicleSpawner.adopt()` |
 | Whether a leaving owner's vehicles go | `clean_up_on_leave` |
-| Who may spawn what | `DotVehicleDef.entitlement` plus the spawner's `entitlements` callable |
-| What replicates | `DotVehicleNetSync.specs()`, resolved by the game's bridge |
-| What comes off, and how hard it has to be hit | `DotVehicleDamage.add_part` (strength is a change of speed at the part, m/s) and the wheels' tyre and hub strengths in `DotVehicleBreakage.setup` |
-| What a burst tyre or a hub does to the drive | `DotVehicleDamage.popped_*` / `hub_*` |
-| Where pieces go and how many | a `DotVehicleDebris` on `breakage.debris` (none on a server: parts are only hidden), its `budget` and `collision_mask` |
+| Who may spawn what | `GSVehicleDef.entitlement` plus the spawner's `entitlements` callable |
+| What replicates | `GSVehicleNetSync.specs()`, resolved by the game's bridge |
+| What comes off, and how hard it has to be hit | `GSVehicleDamage.add_part` (strength is a change of speed at the part, m/s) and the wheels' tyre and hub strengths in `GSVehicleBreakage.setup` |
+| What a burst tyre or a hub does to the drive | `GSVehicleDamage.popped_*` / `hub_*` |
+| Where pieces go and how many | a `GSVehicleDebris` on `breakage.debris` (none on a server: parts are only hidden), its `budget` and `collision_mask` |
 | A client showing the server's losses | `breakage.simulate = false`, then `apply_state(damage.to_dict(), velocities)` |
 
 Deliberately not here: prediction, input, pathfinding, a camera, damage beyond parts and wheels (no deformation, no health per panel on the wire), fuel/gearbox/audio, a shipped aircraft chassis, towing, 2D. [driving](docs/driving.md#deliberately-not-here)

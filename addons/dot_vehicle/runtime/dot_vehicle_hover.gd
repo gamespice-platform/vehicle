@@ -1,13 +1,13 @@
-class_name DotVehicleHover
-extends DotVehicleChassis
+class_name GSVehicleHover
+extends GSVehicleChassis
 
 ## A hovercraft: held above the ground by raycast springs, steered by torque.
 ##
 ## [b]It exists to prove the abstraction, and it is the honest second kind.[/b] A boat
 ## and a hovercraft are the same problem — a body with no wheels, held up by something,
 ## turned by a yaw torque rather than by steered contact patches — and neither of them
-## can be a [VehicleBody3D]. If [DotVehicleWheeled] were the only chassis, "subclass
-## `DotVehicleChassis`" would be an untested promise, which in this family is the same
+## can be a [VehicleBody3D]. If [GSVehicleWheeled] were the only chassis, "subclass
+## `GSVehicleChassis`" would be an untested promise, which in this family is the same
 ## thing as a bug.
 ##
 ## The suspension here IS ours, unlike the wheeled case: four downward rays from the
@@ -15,8 +15,8 @@ extends DotVehicleChassis
 ## is the same model Godot's wheels use, minus the friction — which is the point, since
 ## a hovercraft is a vehicle with no grip.
 
-## How far above the ground it floats, in metres. From [DotVehicleTunables] via
-## [member DotVehicleTunables.suspension_travel], so it retunes with everything else.
+## How far above the ground it floats, in metres. From [GSVehicleTunables] via
+## [member GSVehicleTunables.suspension_travel], so it retunes with everything else.
 var ride_height: float = 1.0
 
 ## Sideways damping, as a fraction of the sideways velocity removed per second.
@@ -33,12 +33,12 @@ var ground_mask: int = 1
 var _mounts: Array[Vector3] = []
 
 
-func _setup() -> DotResult:
+func _setup() -> GSResult:
 	var body := vehicle.body()
 
 	if body == null:
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"A hover vehicle needs a RigidBody3D at the root of its scene.",
 			String(vehicle.def.id) if vehicle.def != null else "?"
 		)
@@ -58,7 +58,7 @@ func _setup() -> DotResult:
 		Vector3(extent.x, 0.0, extent.z),
 	]
 
-	return DotResult.success(self)
+	return GSResult.success(self)
 
 
 func _body_extent(body: RigidBody3D) -> Vector3:
@@ -84,7 +84,7 @@ func _body_extent(body: RigidBody3D) -> Vector3:
 	return Vector3.ONE
 
 
-func _drive(command: DotVehicleCommand, delta: float) -> void:
+func _drive(command: GSVehicleCommand, delta: float) -> void:
 	var body := vehicle.body()
 
 	if body == null:

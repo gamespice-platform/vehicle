@@ -25,7 +25,7 @@ const SECTIONS := 33
 
 
 func _ready() -> void:
-	DotLog.set_level(DotLog.Level.ERROR)
+	GSLog.set_level(GSLog.Level.ERROR)
 	_run.call_deferred()
 
 
@@ -101,13 +101,13 @@ func _run() -> void:
 func _test_seats() -> void:
 	_section("seats")
 
-	var seat := DotVehicleSeat.make(&"driver", true)
+	var seat := GSVehicleSeat.make(&"driver", true)
 	_check(seat.validate().ok, "a seat validates")
 	_check(seat.drives, "and a driving seat drives")
 	_check(not seat.may_fire, "and a driver does not fire by default")
-	_check(DotVehicleSeat.make(&"gunner").may_fire, "and a passenger does")
+	_check(GSVehicleSeat.make(&"gunner").may_fire, "and a passenger does")
 
-	var trapped := DotVehicleSeat.make(&"trapped")
+	var trapped := GSVehicleSeat.make(&"trapped")
 	trapped.exit_offsets = []
 	_check(
 		not trapped.validate().ok,
@@ -115,7 +115,7 @@ func _test_seats() -> void:
 		"the moment a player finds one is the moment they are already in it"
 	)
 
-	var round_tripped := DotVehicleSeat.from_dictionary(seat.to_dictionary())
+	var round_tripped := GSVehicleSeat.from_dictionary(seat.to_dictionary())
 	_check(round_tripped.id == seat.id and round_tripped.drives, "a seat round trips")
 	_check(
 		round_tripped.exit_offsets.size() == seat.exit_offsets.size(),
@@ -127,7 +127,7 @@ func _test_seats() -> void:
 func _test_tunables() -> void:
 	_section("tunables")
 
-	var tuning := DotVehicleTunables.new()
+	var tuning := GSVehicleTunables.new()
 	_check(tuning.validate().ok, "the defaults are usable")
 
 	tuning.brake_force = 10.0
@@ -137,11 +137,11 @@ func _test_tunables() -> void:
 		"it reads as having no brakes, and gets reported as a physics bug"
 	)
 
-	var configured := DotVehicleTunables.new()
+	var configured := GSVehicleTunables.new()
 	configured.apply_dictionary({"top_speed": 50.0, "mass": 1400.0})
 	_check(
 		configured.top_speed == 50.0 and configured.mass == 1400.0,
-		"and it is a DotConfig, so a server retunes handling in a file"
+		"and it is a GSConfig, so a server retunes handling in a file"
 	)
 	_done()
 
@@ -149,7 +149,7 @@ func _test_tunables() -> void:
 func _test_steering_falloff() -> void:
 	_section("steering")
 
-	var tuning := DotVehicleTunables.new()
+	var tuning := GSVehicleTunables.new()
 	tuning.steering_limit_deg = 30.0
 	tuning.steering_speed_falloff = 0.4
 	tuning.top_speed = 30.0
@@ -175,7 +175,7 @@ func _test_steering_falloff() -> void:
 	_done()
 
 
-## [DotRoadProfile]: a camber of 0 is the plain banked deck to the last bit, a crown falls
+## [GSRoadProfile]: a camber of 0 is the plain banked deck to the last bit, a crown falls
 ## both ways on a straight, and a bank as steep as the camber swallows it.
 func _test_road_profile() -> void:
 	_section("road profile")
@@ -184,53 +184,53 @@ func _test_road_profile() -> void:
 	var flat_same := true
 
 	for deg: float in [-12.0, -3.0, 0.0, 0.5, 7.0, 12.0]:
-		var e := DotRoadProfile.bank_slope_of(deg)
+		var e := GSRoadProfile.bank_slope_of(deg)
 		for side: float in [-1.0, 1.0]:
 			var before := -side * tan(deg_to_rad(deg)) * half
-			flat_same = flat_same and is_equal_approx(DotRoadProfile.height_at(side * half, e, 0.0), before)
-		flat_same = flat_same and not DotRoadProfile.crowned(e, 0.0)
-		flat_same = flat_same and DotRoadProfile.cross_section(-half, half, e, 0.0).size() == 2
+			flat_same = flat_same and is_equal_approx(GSRoadProfile.height_at(side * half, e, 0.0), before)
+		flat_same = flat_same and not GSRoadProfile.crowned(e, 0.0)
+		flat_same = flat_same and GSRoadProfile.cross_section(-half, half, e, 0.0).size() == 2
 
 	_check(flat_same, "a camber of 0 is the banked deck there was, with no crown vertex")
 
-	var c := DotRoadProfile.camber_slope_of(2.0)
+	var c := GSRoadProfile.camber_slope_of(2.0)
 	_check(is_equal_approx(c, 0.02), "a camber is given in percent")
 	_check(
-		is_equal_approx(DotRoadProfile.height_at(-half, 0.0, c), -0.1)
-			and is_equal_approx(DotRoadProfile.height_at(half, 0.0, c), -0.1),
+		is_equal_approx(GSRoadProfile.height_at(-half, 0.0, c), -0.1)
+			and is_equal_approx(GSRoadProfile.height_at(half, 0.0, c), -0.1),
 		"a 2% crown on a straight drops both edges of a 10 m road by 10 cm",
-		"%.3f / %.3f" % [DotRoadProfile.height_at(-half, 0.0, c), DotRoadProfile.height_at(half, 0.0, c)]
+		"%.3f / %.3f" % [GSRoadProfile.height_at(-half, 0.0, c), GSRoadProfile.height_at(half, 0.0, c)]
 	)
-	_check(DotRoadProfile.height_at(0.0, 0.0, c) == 0.0, "and leaves the centreline where it was")
+	_check(GSRoadProfile.height_at(0.0, 0.0, c) == 0.0, "and leaves the centreline where it was")
 
-	var section := DotRoadProfile.cross_section(-half, half, 0.0, c)
+	var section := GSRoadProfile.cross_section(-half, half, 0.0, c)
 	_check(section.size() == 3 and section[1] == Vector2.ZERO, "so the deck has a crown vertex on the centreline")
 	_check(
-		DotRoadProfile.cross_section(0.5, half, 0.0, c).size() == 2,
+		GSRoadProfile.cross_section(0.5, half, 0.0, c).size() == 2,
 		"but not on a strip that does not reach the centreline (a washout's kept side)"
 	)
 
-	var steep := DotRoadProfile.bank_slope_of(6.0)
+	var steep := GSRoadProfile.bank_slope_of(6.0)
 	_check(
-		not DotRoadProfile.crowned(steep, c) and not DotRoadProfile.crowned(-steep, c)
-			and is_equal_approx(DotRoadProfile.height_at(-half, steep, c), steep * half),
+		not GSRoadProfile.crowned(steep, c) and not GSRoadProfile.crowned(-steep, c)
+			and is_equal_approx(GSRoadProfile.height_at(-half, steep, c), steep * half),
 		"a bank steeper than the camber is the plain banked deck"
 	)
 
 	# The runout: halfway to the camber the high half is level, the low half keeps the crown.
-	var mid := DotRoadProfile.half_slopes(c * 0.5, c)
-	var mid_left := DotRoadProfile.half_slopes(-c * 0.5, c)
+	var mid := GSRoadProfile.half_slopes(c * 0.5, c)
+	var mid_left := GSRoadProfile.half_slopes(-c * 0.5, c)
 	_check(
 		is_zero_approx(mid.x) and is_equal_approx(mid.y, c) and is_zero_approx(mid_left.y) and is_equal_approx(mid_left.x, -c),
 		"half a camber's bank levels the high half and keeps the low half's fall, either way round",
 		"%s %s" % [mid, mid_left]
 	)
 
-	var big := DotRoadProfile.half_slopes(0.0, 0.5)
+	var big := GSRoadProfile.half_slopes(0.0, 0.5)
 	_check(is_equal_approx(big.y, 0.5) and is_equal_approx(big.x, -0.5), "and no camber is too steep to draw as asked")
 	_check(
-		DotRoadProfile.check_camber(-0.01) != "" and DotRoadProfile.check_camber(NAN) != ""
-			and DotRoadProfile.check_camber(INF) != "" and DotRoadProfile.check_camber(0.0) == "",
+		GSRoadProfile.check_camber(-0.01) != "" and GSRoadProfile.check_camber(NAN) != ""
+			and GSRoadProfile.check_camber(INF) != "" and GSRoadProfile.check_camber(0.0) == "",
 		"a negative or non-finite camber is refused by name"
 	)
 	_done()
@@ -243,22 +243,22 @@ func _test_definitions() -> void:
 	_check(jeep.validate().ok, "a definition validates")
 	_check(jeep.driver_seats().size() == 1, "and it has a driving seat")
 
-	var scenery := DotVehicleDef.make(&"statue", CAR)
+	var scenery := GSVehicleDef.make(&"statue", CAR)
 	_check(
 		not scenery.validate().ok, "a vehicle with no seats is refused", "it is scenery"
 	)
 
-	var undriveable := DotVehicleDef.make(&"trailer", CAR)
-	undriveable.seats = [DotVehicleSeat.make(&"passenger")]
+	var undriveable := GSVehicleDef.make(&"trailer", CAR)
+	undriveable.seats = [GSVehicleSeat.make(&"passenger")]
 	_check(
 		not undriveable.validate().ok,
 		"and so is one with no driving seat",
 		"nobody could ever move it"
 	)
 
-	var clashing := DotVehicleDef.make(&"twin", CAR)
+	var clashing := GSVehicleDef.make(&"twin", CAR)
 	clashing.seats = [
-		DotVehicleSeat.make(&"driver", true), DotVehicleSeat.make(&"driver")
+		GSVehicleSeat.make(&"driver", true), GSVehicleSeat.make(&"driver")
 	]
 	_check(
 		not clashing.validate().ok,
@@ -266,15 +266,15 @@ func _test_definitions() -> void:
 		"the second is unreachable, so the vehicle quietly holds one fewer person"
 	)
 
-	var by_class := DotVehicleDef.make(&"jeep", CAR)
-	by_class.seats = [DotVehicleSeat.make(&"driver", true)]
+	var by_class := GSVehicleDef.make(&"jeep", CAR)
+	by_class.seats = [GSVehicleSeat.make(&"driver", true)]
 	by_class.chassis_script_path = "MyChassis"
 	_check(
 		not by_class.validate().ok,
 		"a chassis named by class rather than by path is refused"
 	)
 
-	var round_tripped := DotVehicleDef.from_dictionary(jeep.to_dictionary())
+	var round_tripped := GSVehicleDef.from_dictionary(jeep.to_dictionary())
 	_check(round_tripped.id == jeep.id, "a definition survives a round trip")
 	_check(round_tripped.seat_count() == 2, "with its seats")
 	_check(
@@ -294,7 +294,7 @@ func _test_catalogue() -> void:
 	_check(cat.seating_at_least(2).size() == 2, "and can be asked for room for two")
 
 	var rejected := PackedStringArray()
-	var reloaded := DotVehicleCatalogue.from_dictionary({
+	var reloaded := GSVehicleCatalogue.from_dictionary({
 		"vehicles": [
 			{"id": "good", "scene": CAR, "seats": [{"id": "driver", "drives": true}]},
 			{"id": "seatless", "scene": CAR},
@@ -312,7 +312,7 @@ func _test_catalogue() -> void:
 func _test_commands() -> void:
 	_section("commands")
 
-	var cmd := DotVehicleCommand.make(40.0, -9.0, 3.0)
+	var cmd := GSVehicleCommand.make(40.0, -9.0, 3.0)
 	cmd.sanitise()
 	_check(
 		cmd.throttle == 1.0 and cmd.steer == -1.0 and cmd.brake == 1.0,
@@ -320,7 +320,7 @@ func _test_commands() -> void:
 		"a client is a program the player can edit"
 	)
 
-	var poisoned := DotVehicleCommand.new()
+	var poisoned := GSVehicleCommand.new()
 	poisoned.throttle = NAN
 	poisoned.steer = NAN
 	poisoned.aim_yaw = NAN
@@ -331,19 +331,19 @@ func _test_commands() -> void:
 		"clampf(NAN) is NAN, and one NaN ends a vehicle's transform for the round"
 	)
 
-	_check(DotVehicleCommand.new().is_idle(), "an empty command is idle")
+	_check(GSVehicleCommand.new().is_idle(), "an empty command is idle")
 
 	# One key to slow down and to reverse. A direction each way, because "it braked" alone
 	# would pass for a helper that braked a vehicle trying to reverse from a standstill.
-	var rolling := DotVehicleCommand.make(-1.0).brake_then_reverse(12.0)
+	var rolling := GSVehicleCommand.make(-1.0).brake_then_reverse(12.0)
 	_check(rolling.throttle == 0.0 and rolling.brake == 1.0,
 		"back while rolling forward is the brake, not reverse thrust",
 		"throttle %.2f, brake %.2f" % [rolling.throttle, rolling.brake])
-	var stopped := DotVehicleCommand.make(-1.0).brake_then_reverse(0.3)
+	var stopped := GSVehicleCommand.make(-1.0).brake_then_reverse(0.3)
 	_check(stopped.throttle == -1.0 and stopped.brake == 0.0,
 		"and once (nearly) stopped it reverses",
 		"throttle %.2f, brake %.2f" % [stopped.throttle, stopped.brake])
-	var reversing := DotVehicleCommand.make(0.6).brake_then_reverse(-5.0)
+	var reversing := GSVehicleCommand.make(0.6).brake_then_reverse(-5.0)
 	_check(reversing.throttle == 0.0 and is_equal_approx(reversing.brake, 0.6),
 		"and forward while rolling backwards brakes first, as hard as the key is pressed",
 		"throttle %.2f, brake %.2f" % [reversing.throttle, reversing.brake])
@@ -379,7 +379,7 @@ func _test_spawning() -> void:
 ## A body created by somebody else, made a vehicle.
 ##
 ## The case that put this method here is game-playlot, where every spawnable is a
-## `DotPropInstance` so that a gravity gun can punt it — so the body exists, in the
+## `GSPropInstance` so that a gravity gun can punt it — so the body exists, in the
 ## world, before anything knows it is a car.
 func _test_adopting() -> void:
 	_section("adopting")
@@ -395,7 +395,7 @@ func _test_adopting() -> void:
 
 	_check(jeep != null, "a body somebody else made becomes a vehicle")
 	_check(jeep.node == body, "over the node it was given, not a second one")
-	_check(jeep.chassis is DotVehicleWheeled, "with its chassis attached")
+	_check(jeep.chassis is GSVehicleWheeled, "with its chassis attached")
 	_check(spawner.world_count() == 1, "and it counts against the world budget")
 	_check(
 		jeep.position().distance_to(Vector3(0, 1, 40)) < 0.5,
@@ -423,7 +423,7 @@ func _test_adopting() -> void:
 func _test_authority() -> void:
 	_section("authority")
 
-	var client := DotVehicleSpawner.new()
+	var client := GSVehicleSpawner.new()
 	client.catalogue = _catalogue()
 	client.authoritative = false
 	_world.add_child(client)
@@ -466,14 +466,14 @@ func _test_chassis() -> void:
 	var spawner := _spawner()
 
 	var jeep := spawner.spawn(&"jeep", Vector3(0, 1, 0))
-	_check(jeep.chassis is DotVehicleWheeled, "a wheeled definition gets Godot's wheels")
+	_check(jeep.chassis is GSVehicleWheeled, "a wheeled definition gets Godot's wheels")
 
 	var skiff := spawner.spawn(&"skiff", Vector3(0, 1, 20))
-	_check(skiff.chassis is DotVehicleHover, "a hover definition gets the hover chassis")
+	_check(skiff.chassis is GSVehicleHover, "a hover definition gets the hover chassis")
 
 	var scripted := spawner.spawn(&"scripted", Vector3(0, 1, 40))
 	_check(
-		scripted.chassis != null and scripted.chassis is DotVehicleChassis,
+		scripted.chassis != null and scripted.chassis is GSVehicleChassis,
 		"and a definition naming a script by PATH gets that",
 		"the shape a delivered chassis must have"
 	)
@@ -495,8 +495,8 @@ func _test_chassis() -> void:
 
 	# A wheeled definition over a scene with no wheels: the refusal that matters,
 	# because the alternative is something that looks like a car for four seconds.
-	var wrong := DotVehicleDef.make(&"wrong", SKIFF)
-	wrong.seats = [DotVehicleSeat.make(&"driver", true)]
+	var wrong := GSVehicleDef.make(&"wrong", SKIFF)
+	wrong.seats = [GSVehicleSeat.make(&"driver", true)]
 	spawner.catalogue.add(wrong)
 
 	var mismatched := spawner.spawn(&"wrong", Vector3(0, 1, 100))
@@ -522,7 +522,7 @@ func _test_driving() -> void:
 
 	var before := jeep.position()
 
-	spawner.set_command(jeep.instance_id, &"alice", DotVehicleCommand.make(1.0))
+	spawner.set_command(jeep.instance_id, &"alice", GSVehicleCommand.make(1.0))
 
 	for i in 90:
 		spawner.tick(1.0 / 60.0)
@@ -547,7 +547,7 @@ func _test_driving() -> void:
 	# translation lives in one place; a check that only measured "it turned" would pass
 	# for a car that turns the wrong way, which is the bug the sign flip exists for.
 	var heading_before := -jeep.node.global_transform.basis.z
-	spawner.set_command(jeep.instance_id, &"alice", DotVehicleCommand.make(1.0, 1.0))
+	spawner.set_command(jeep.instance_id, &"alice", GSVehicleCommand.make(1.0, 1.0))
 
 	for i in 150:
 		spawner.tick(1.0 / 60.0)
@@ -562,7 +562,7 @@ func _test_driving() -> void:
 		"%.1f deg" % rad_to_deg(turned)
 	)
 
-	var passenger_cmd := DotVehicleCommand.make(1.0)
+	var passenger_cmd := GSVehicleCommand.make(1.0)
 	_check(
 		not spawner.set_command(jeep.instance_id, &"bob", passenger_cmd).ok,
 		"somebody who is not driving cannot send a command",
@@ -616,11 +616,11 @@ func _test_brakes() -> void:
 		if child is VehicleWheel3D:
 			wheels.append(child)
 
-	var both := DotVehicleCommand.make(0.0, 0.0, 1.0)
+	var both := GSVehicleCommand.make(0.0, 0.0, 1.0)
 	both.handbrake = true
 	jeep.chassis.drive(both, 1.0 / 60.0)
 
-	var step := (jeep.chassis as DotVehicleWheeled).step_seconds()
+	var step := (jeep.chassis as GSVehicleWheeled).step_seconds()
 	var front := wheels[0].brake
 	var rear := wheels[3].brake
 	_check(
@@ -640,7 +640,7 @@ func _test_brakes() -> void:
 		"mode %d, %.2f" % [body.linear_damp_mode, body.linear_damp]
 	)
 
-	var coasting := DotVehicleCommand.make()
+	var coasting := GSVehicleCommand.make()
 	jeep.chassis.drive(coasting, 1.0 / 60.0)
 	_check(wheels[0].brake == 0.0 and wheels[3].brake == 0.0, "and letting go takes every brake off")
 
@@ -682,10 +682,10 @@ func _stopping_distance(mass: float, rate: int, at: Vector3) -> float:
 	spawner.catalogue.add(def)
 
 	var car := spawner.spawn(&"weighed", at)
-	var chassis := car.chassis as DotVehicleChassis
+	var chassis := car.chassis as GSVehicleChassis
 	var dt := 1.0 / float(rate)
-	var go := DotVehicleCommand.make(1.0)
-	var stop := DotVehicleCommand.make(0.0, 0.0, 1.0)
+	var go := GSVehicleCommand.make(1.0)
+	var stop := GSVehicleCommand.make(0.0, 0.0, 1.0)
 
 	var guard := rate * 15
 	while car.forward_speed() < 13.89 and guard > 0:
@@ -712,13 +712,13 @@ func _test_no_leaked_nodes() -> void:
 	var holder := Node3D.new()
 	_world.add_child(holder)
 
-	var spawner := DotVehicleSpawner.new()
+	var spawner := GSVehicleSpawner.new()
 	spawner.catalogue = _catalogue()
 	spawner.authoritative = true
 	spawner.world_budget = 0
 	spawner.per_player_budget = 0
 	spawner.spawn_interval = 0.0
-	spawner.world_ref = DotNodeRef.of_self()
+	spawner.world_ref = GSNodeRef.of_self()
 	holder.add_child(spawner)
 
 	for i in 6:

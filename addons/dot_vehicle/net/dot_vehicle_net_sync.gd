@@ -1,4 +1,4 @@
-class_name DotVehicleNetSync
+class_name GSVehicleNetSync
 extends RefCounted
 
 ## What a vehicle has to tell every client, and how to get it there.
@@ -6,7 +6,7 @@ extends RefCounted
 ## [b]GameSpice Net is not a dependency and is not imported here.[/b] Only GameSpice Core is a hard
 ## dependency in this family, and a script that [i]mentions[/i] a [code]class_name[/code]
 ## the project does not have fails to parse. Types are named as strings and a bridge
-## resolves them with [code]DotNetVar.Type[spec.type][/code].
+## resolves them with [code]GSNetVar.Type[spec.type][/code].
 ##
 ## [b]A full orientation, not a yaw.[/b] Every other replicated body in this family
 ## sends a yaw and reconstructs the rest, because a player stands upright. A vehicle
@@ -20,10 +20,10 @@ extends RefCounted
 ## the midpoint, so every client drew the body snapping round at the snapshot rate while
 ## its position slid (game-playlot's headless_net: heading still on 26 of 31 turning
 ## ticks, `[veh-heading-1]`). GameSpice Net's own type slerps between snapshots and costs
-## smallest-three at [code]DotNetConfig.rotation_bits[/code] (29 bits at the default 9,
+## smallest-three at [code]GSNetConfig.rotation_bits[/code] (29 bits at the default 9,
 ## against 44).
 ##
-## [b]Everything is interpolated and nothing is predicted.[/b] See [DotVehicleSpawner]
+## [b]Everything is interpolated and nothing is predicted.[/b] See [GSVehicleSpawner]
 ## for the argument. The consequence for a bridge is that the driver's own client
 ## interpolates too: it is the only thing that hides the snapshot rate without
 ## inventing physics the server did not simulate.
@@ -90,7 +90,7 @@ static func properties() -> Array[StringName]:
 
 
 ## Copies a vehicle's state onto a replicating object.
-static func pull(vehicle: DotVehicleInstance, into: Object) -> void:
+static func pull(vehicle: GSVehicleInstance, into: Object) -> void:
 	if vehicle == null or into == null or not vehicle.is_alive():
 		return
 
@@ -105,7 +105,7 @@ static func pull(vehicle: DotVehicleInstance, into: Object) -> void:
 	into.set(&"net_health", quantise_health(vehicle))
 	into.set(&"net_occupancy", occupancy_mask(vehicle))
 
-	var chassis := vehicle.chassis as DotVehicleChassis
+	var chassis := vehicle.chassis as GSVehicleChassis
 	# The wheels' angle is sent so a client can turn them.
 	#
 	# [b]It cannot be derived from anything else that is sent.[/b] A client watching a
@@ -173,7 +173,7 @@ static func dequantise_steering(value: int) -> float:
 ## An indestructible vehicle reads as 100 rather than as 0. A client cannot tell the
 ## difference between "no health" and "not destructible", and drawing an empty bar over
 ## a car nothing can hurt is worse than drawing a full one.
-static func quantise_health(vehicle: DotVehicleInstance) -> int:
+static func quantise_health(vehicle: GSVehicleInstance) -> int:
 	if vehicle == null or vehicle.def == null or not vehicle.is_destructible():
 		return 100
 
@@ -189,7 +189,7 @@ static func quantise_health(vehicle: DotVehicleInstance) -> int:
 ## in order to draw a "get in" prompt and to place bodies; it does not need to know
 ## [i]who[/i] is in a seat it cannot see into, and sending ids would be a per-vehicle
 ## roster of everybody's position on the map.
-static func occupancy_mask(vehicle: DotVehicleInstance) -> int:
+static func occupancy_mask(vehicle: GSVehicleInstance) -> int:
 	if vehicle == null or vehicle.def == null:
 		return 0
 

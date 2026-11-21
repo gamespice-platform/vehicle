@@ -1,11 +1,11 @@
 @tool
-class_name DotVehicleDef
+class_name GSVehicleDef
 extends Resource
 
 ## One kind of vehicle a game can spawn.
 ##
 ## [b]A definition, not a scene[/b] — the same shape and the same reasoning as
-## [code]DotPropDef[/code], [code]DotNpcDef[/code] and [code]DotMapDef[/code]. A spawn
+## [code]GSPropDef[/code], [code]GSNpcDef[/code] and [code]GSMapDef[/code]. A spawn
 ## menu listing thirty vehicles must not load thirty scenes, and a server checking
 ## whether a player may have one must answer without loading any.
 ##
@@ -56,8 +56,8 @@ enum Kind {
 
 @export var kind: Kind = Kind.WHEELED
 
-## Handling. Null falls back to [DotVehicleTunables]' own defaults.
-@export var tunables: DotVehicleTunables = null
+## Handling. Null falls back to [GSVehicleTunables]' own defaults.
+@export var tunables: GSVehicleTunables = null
 
 ## Seats, in the order a player is put into them when they ask for "any".
 ##
@@ -65,7 +65,7 @@ enum Kind {
 ## [method first_free_seat] walks this array in order, so a player entering an empty
 ## vehicle should end up driving it — which is what everybody expects and what nobody
 ## thinks to specify.
-@export var seats: Array[DotVehicleSeat] = []
+@export var seats: Array[GSVehicleSeat] = []
 
 @export_group("Limits")
 
@@ -91,8 +91,8 @@ enum Kind {
 @export var meta: Dictionary = {}
 
 
-static func make(p_id: StringName, p_scene: String) -> DotVehicleDef:
-	var def := DotVehicleDef.new()
+static func make(p_id: StringName, p_scene: String) -> GSVehicleDef:
+	var def := GSVehicleDef.new()
 	def.id = p_id
 	def.scene_path = p_scene
 	def.display_name = String(p_id).capitalize()
@@ -111,7 +111,7 @@ func seat_count() -> int:
 	return seats.size()
 
 
-func get_seat(seat_id: StringName) -> DotVehicleSeat:
+func get_seat(seat_id: StringName) -> GSVehicleSeat:
 	for seat in seats:
 		if seat.id == seat_id:
 			return seat
@@ -119,8 +119,8 @@ func get_seat(seat_id: StringName) -> DotVehicleSeat:
 	return null
 
 
-func driver_seats() -> Array[DotVehicleSeat]:
-	var out: Array[DotVehicleSeat] = []
+func driver_seats() -> Array[GSVehicleSeat]:
+	var out: Array[GSVehicleSeat] = []
 
 	for seat in seats:
 		if seat.drives:
@@ -130,31 +130,31 @@ func driver_seats() -> Array[DotVehicleSeat]:
 
 
 ## The tunables, never null. Callers get defaults rather than a crash.
-func tuning() -> DotVehicleTunables:
-	return tunables if tunables != null else DotVehicleTunables.new()
+func tuning() -> GSVehicleTunables:
+	return tunables if tunables != null else GSVehicleTunables.new()
 
 
-func validate() -> DotResult:
+func validate() -> GSResult:
 	if id == &"":
-		return DotResult.fail(DotError.CODE_INVALID, "A vehicle needs an id.")
+		return GSResult.fail(GSError.CODE_INVALID, "A vehicle needs an id.")
 
 	if scene_path == "":
-		return DotResult.fail(
-			DotError.CODE_INVALID, "A vehicle needs a scene path.", String(id)
+		return GSResult.fail(
+			GSError.CODE_INVALID, "A vehicle needs a scene path.", String(id)
 		)
 
 	if chassis_script_path != "" and not chassis_script_path.ends_with(".gd"):
 		# Caught here rather than at spawn, because a catalogue is loaded once at boot
 		# and a spawn happens in the middle of a round.
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"chassis_script_path must be a path to a .gd script, not a class name.",
 			"%s: %s" % [String(id), chassis_script_path]
 		)
 
 	if seats.is_empty():
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"A vehicle with no seats is scenery.",
 			String(id)
 		)
@@ -171,8 +171,8 @@ func validate() -> DotResult:
 			# Two seats with one id makes `get_seat` return the first and every enter
 			# request land in it, so the second seat is unreachable and the vehicle
 			# quietly holds one fewer person than it says.
-			return DotResult.fail(
-				DotError.CODE_INVALID,
+			return GSResult.fail(
+				GSError.CODE_INVALID,
 				"Two seats share an id.",
 				"%s: %s" % [String(id), String(seat.id)]
 			)
@@ -180,8 +180,8 @@ func validate() -> DotResult:
 		seen[seat.id] = true
 
 	if driver_seats().is_empty() and kind != Kind.CUSTOM:
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"A vehicle with no driving seat can never be driven.",
 			String(id)
 		)
@@ -192,7 +192,7 @@ func validate() -> DotResult:
 		if not tuned.ok:
 			return tuned.wrap("Handling for %s is not usable." % String(id))
 
-	return DotResult.success(null)
+	return GSResult.success(null)
 
 
 func to_dictionary() -> Dictionary:
@@ -234,8 +234,8 @@ func to_dictionary() -> Dictionary:
 	return out
 
 
-static func from_dictionary(data: Dictionary) -> DotVehicleDef:
-	var def := DotVehicleDef.new()
+static func from_dictionary(data: Dictionary) -> GSVehicleDef:
+	var def := GSVehicleDef.new()
 
 	def.id = StringName(str(data.get("id", "")))
 	def.scene_path = str(data.get("scene", ""))
@@ -253,18 +253,18 @@ static func from_dictionary(data: Dictionary) -> DotVehicleDef:
 	var raw_seats: Variant = data.get("seats", [])
 
 	if raw_seats is Array:
-		var seats: Array[DotVehicleSeat] = []
+		var seats: Array[GSVehicleSeat] = []
 
 		for entry in (raw_seats as Array):
 			if entry is Dictionary:
-				seats.append(DotVehicleSeat.from_dictionary(entry as Dictionary))
+				seats.append(GSVehicleSeat.from_dictionary(entry as Dictionary))
 
 		def.seats = seats
 
 	var raw_tuning: Variant = data.get("tuning", null)
 
 	if raw_tuning is Dictionary:
-		var tuning := DotVehicleTunables.new()
+		var tuning := GSVehicleTunables.new()
 		tuning.apply_dictionary(raw_tuning as Dictionary)
 		def.tunables = tuning
 
@@ -293,4 +293,4 @@ func describe() -> Dictionary:
 
 
 func _to_string() -> String:
-	return "DotVehicleDef(%s, %d seats)" % [String(id), seats.size()]
+	return "GSVehicleDef(%s, %d seats)" % [String(id), seats.size()]

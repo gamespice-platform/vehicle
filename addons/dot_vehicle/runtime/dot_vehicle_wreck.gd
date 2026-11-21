@@ -1,8 +1,8 @@
-class_name DotVehicleWreck
+class_name GSVehicleWreck
 extends Node
 
-## Takes a vehicle through a crash: it tumbles, every knock tears more off, and it explodes ([DotVehicleExplosion]) on the first rest after an impact or after [member fuse] seconds.
-## Also the smoke and fire that follow how broken a vehicle looks. Child of the body, beside its [DotVehicleBreakage].
+## Takes a vehicle through a crash: it tumbles, every knock tears more off, and it explodes ([GSVehicleExplosion]) on the first rest after an impact or after [member fuse] seconds.
+## Also the smoke and fire that follow how broken a vehicle looks. Child of the body, beside its [GSVehicleBreakage].
 ## The simulating side calls [method crash]; a client only draws smoke from the replicated damage state.
 
 const CHANNEL := "vehicle.wreck"
@@ -12,7 +12,7 @@ signal exploded(at: Vector3, velocity: Vector3)
 
 enum Phase { WHOLE, TUMBLING, BURNING }
 
-var breakage: DotVehicleBreakage = null
+var breakage: GSVehicleBreakage = null
 var body: RigidBody3D = null
 var phase: Phase = Phase.WHOLE
 
@@ -41,7 +41,7 @@ var rest_speed: float = 3.0
 ## How hard the explosion throws the body, as a multiple of its weight's worth of speed.
 var blast: float = 7.0
 
-## The fraction of damage ([method DotVehicleDamage.distress]) where smoke starts, and fire.
+## The fraction of damage ([method GSVehicleDamage.distress]) where smoke starts, and fire.
 var smoke_from: float = 0.2
 var fire_from: float = 0.6
 
@@ -57,15 +57,15 @@ var _fire: CPUParticles3D = null
 var _shown: float = -1.0
 
 
-func setup(p_body: RigidBody3D, p_breakage: DotVehicleBreakage) -> DotResult:
+func setup(p_body: RigidBody3D, p_breakage: GSVehicleBreakage) -> GSResult:
 	if p_body == null or p_breakage == null:
-		return DotResult.fail(DotError.CODE_INVALID, "A wreck needs a body and its breakage.")
+		return GSResult.fail(GSError.CODE_INVALID, "A wreck needs a body and its breakage.")
 
 	body = p_body
 	breakage = p_breakage
 	var _c := breakage.impact.connect(_on_impact)
 	var _b := breakage.broke.connect(_on_broke)
-	return DotResult.success(self)
+	return GSResult.success(self)
 
 
 ## Starts the crash: the vehicle is thrown into a tumble and the knocks that follow tear it
@@ -84,7 +84,7 @@ func crash(spin: Vector3 = Vector3.ZERO) -> void:
 	var v := body.linear_velocity
 	var about := spin if spin != Vector3.ZERO else Vector3(v.z, 0.0, -v.x).normalized() * clampf(v.length() * 0.35, 2.0, 7.0)
 	body.angular_velocity += about
-	DotLog.debug(CHANNEL, "a crash", {"speed": "%.1f" % v.length()})
+	GSLog.debug(CHANNEL, "a crash", {"speed": "%.1f" % v.length()})
 
 
 func is_wrecked() -> bool:
@@ -176,7 +176,7 @@ func _on_impact(local_at: Vector3, dv: float) -> void:
 	var order: Array = []
 
 	for id: StringName in breakage.damage.parts:
-		var part: DotVehicleDamage.Part = breakage.damage.parts[id]
+		var part: GSVehicleDamage.Part = breakage.damage.parts[id]
 		if not part.lost and part.kind != &"cargo":
 			order.append([part.centre.distance_to(local_at), id])
 

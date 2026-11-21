@@ -31,7 +31,7 @@ class ToyCar extends RefCounted:
 	func velocity() -> Vector3:
 		return forward() * speed
 
-	func step(command: DotVehicleCommand, delta: float) -> void:
+	func step(command: GSVehicleCommand, delta: float) -> void:
 		speed += command.throttle * accel * delta
 		speed -= command.brake * decel * delta * signf(speed)
 		speed -= speed * drag * delta
@@ -49,7 +49,7 @@ class ToyCar extends RefCounted:
 
 
 func _drive_toy(
-	driver: DotVehicleDriver, car: ToyCar, seconds: float, delta: float = 0.05
+	driver: GSVehicleDriver, car: ToyCar, seconds: float, delta: float = 0.05
 ) -> int:
 	var steps := int(seconds / delta)
 
@@ -68,7 +68,7 @@ func _drive_toy(
 func test_driver_steering() -> void:
 	t._section("driver steering")
 
-	var driver := DotVehicleDriver.new()
+	var driver := GSVehicleDriver.new()
 	var forward := Vector3.FORWARD
 	var right := Vector3.RIGHT
 
@@ -121,10 +121,10 @@ func test_driver_steering() -> void:
 		"brake = %.2f" % into_a_corner.brake
 	)
 
-	var idle := DotVehicleDriver.new()
+	var idle := GSVehicleDriver.new()
 	var nothing := idle.drive_from(Vector3.ZERO, forward, right, forward * 10.0, 0.05)
 	t._check(
-		idle.state == DotVehicleDriver.State.IDLE,
+		idle.state == GSVehicleDriver.State.IDLE,
 		"a driver with nowhere to go is idle"
 	)
 	t._check(
@@ -137,7 +137,7 @@ func test_driver_steering() -> void:
 func test_driver_route() -> void:
 	t._section("driver route")
 
-	var driver := DotVehicleDriver.new()
+	var driver := GSVehicleDriver.new()
 	driver.set_route(PackedVector3Array([
 		Vector3(0, 0, -20), Vector3(0, 0, -40), Vector3(0, 0, -60),
 	]))
@@ -173,7 +173,7 @@ func test_driver_route() -> void:
 
 	# Look-ahead aims past the corner rather than at it, which is the difference
 	# between cutting every bend and taking a line through them.
-	var cornering := DotVehicleDriver.new()
+	var cornering := GSVehicleDriver.new()
 	cornering.look_ahead = 5.0
 	cornering.set_route(PackedVector3Array([Vector3(0, 0, -30), Vector3(30, 0, -30)]))
 
@@ -195,7 +195,7 @@ func test_driver_route() -> void:
 
 	driver.clear()
 	t._check(
-		not driver.has_route() and driver.state == DotVehicleDriver.State.IDLE,
+		not driver.has_route() and driver.state == GSVehicleDriver.State.IDLE,
 		"a cleared route leaves the driver idle"
 	)
 	t._done()
@@ -204,28 +204,28 @@ func test_driver_route() -> void:
 func test_driver_stuck() -> void:
 	t._section("driver getting unstuck")
 
-	var driver := DotVehicleDriver.new()
+	var driver := GSVehicleDriver.new()
 	driver.stuck_time = 0.5
 	driver.reverse_time = 0.4
 	driver.set_target(Vector3(0, 0, -50))
 
 	# A car against a lamppost: full throttle, no movement. Without this every vehicle
 	# AI ends the round parked against the first thing it hit.
-	var command: DotVehicleCommand = null
+	var command: GSVehicleCommand = null
 	for i in 20:
 		command = driver.drive_from(
 			Vector3.ZERO, Vector3.FORWARD, Vector3.RIGHT, Vector3.ZERO, 0.05
 		)
 
 	t._check(
-		driver.state == DotVehicleDriver.State.REVERSING,
+		driver.state == GSVehicleDriver.State.REVERSING,
 		"a driver asking for throttle and going nowhere decides it is stuck"
 	)
 	t._check(command.throttle < 0.0, "and reverses")
 
 	# Backing out along the line you drove in on puts you back where you were.
 	driver.set_target(Vector3(30, 0, -30))
-	driver.state = DotVehicleDriver.State.REVERSING
+	driver.state = GSVehicleDriver.State.REVERSING
 	var backing := driver.drive_from(
 		Vector3.ZERO, Vector3.FORWARD, Vector3.RIGHT, Vector3.ZERO, 0.05
 	)
@@ -241,7 +241,7 @@ func test_driver_stuck() -> void:
 
 	for i in 40:
 		driver.drive_from(Vector3.ZERO, Vector3.FORWARD, Vector3.RIGHT, Vector3.ZERO, 0.05)
-		if driver.state == DotVehicleDriver.State.DRIVING:
+		if driver.state == GSVehicleDriver.State.DRIVING:
 			went_forward_again = true
 
 	t._check(
@@ -250,7 +250,7 @@ func test_driver_stuck() -> void:
 	)
 
 	# A vehicle that is moving is not stuck, however slowly it is going somewhere.
-	var moving := DotVehicleDriver.new()
+	var moving := GSVehicleDriver.new()
 	moving.stuck_time = 0.5
 	moving.set_target(Vector3(0, 0, -50))
 
@@ -260,17 +260,17 @@ func test_driver_stuck() -> void:
 		)
 
 	t._check(
-		moving.state == DotVehicleDriver.State.DRIVING,
+		moving.state == GSVehicleDriver.State.DRIVING,
 		"a vehicle that is moving is never stuck"
 	)
 
-	var patient := DotVehicleDriver.new()
+	var patient := GSVehicleDriver.new()
 	patient.stuck_time = 0.0
 	patient.set_target(Vector3(0, 0, -50))
 	for i in 40:
 		patient.drive_from(Vector3.ZERO, Vector3.FORWARD, Vector3.RIGHT, Vector3.ZERO, 0.05)
 	t._check(
-		patient.state == DotVehicleDriver.State.DRIVING,
+		patient.state == GSVehicleDriver.State.DRIVING,
 		"and a stuck time of zero disables the whole thing"
 	)
 	t._done()
@@ -281,7 +281,7 @@ func test_driver_drives_a_car() -> void:
 
 	# The check that is worth all the others: does something actually get there.
 	var car := ToyCar.new()
-	var driver := DotVehicleDriver.new()
+	var driver := GSVehicleDriver.new()
 	driver.target_speed = 12.0
 	driver.set_route(PackedVector3Array([
 		Vector3(0, 0, -40),
@@ -303,7 +303,7 @@ func test_driver_drives_a_car() -> void:
 	# body puts its transform beyond recovery for the rest of the round, and the
 	# vehicle vanishes rather than erroring.
 	var clean := ToyCar.new()
-	var probe := DotVehicleDriver.new()
+	var probe := GSVehicleDriver.new()
 	probe.set_route(PackedVector3Array([Vector3(0, 0, -30), Vector3(0, 0, -30)]))
 
 	var sane := true
@@ -319,7 +319,7 @@ func test_driver_drives_a_car() -> void:
 
 	var reversed := ToyCar.new()
 	reversed.yaw = PI
-	var turner := DotVehicleDriver.new()
+	var turner := GSVehicleDriver.new()
 	turner.target_speed = 10.0
 	turner.set_target(Vector3(0, 0, -40))
 
@@ -330,7 +330,7 @@ func test_driver_drives_a_car() -> void:
 		"%d ticks" % turned
 	)
 
-	var nowhere := DotVehicleDriver.new()
+	var nowhere := GSVehicleDriver.new()
 	t._check(
 		nowhere.drive(null, 0.05).is_idle(),
 		"and driving a vehicle that is not there is an idle command, not a crash"
@@ -341,25 +341,25 @@ func test_driver_drives_a_car() -> void:
 
 ## The wiring, the half that is usually missing: an empty vehicle with an autopilot drives itself.
 func _check_autopilot() -> void:
-	var spawner: DotVehicleSpawner = t._spawner()
+	var spawner: GSVehicleSpawner = t._spawner()
 	var vehicle := spawner.spawn(&"jeep", Vector3(0, 1, 0))
 	t._check(vehicle != null, "a vehicle spawns for the autopilot check")
 
-	vehicle.autopilot = DotVehicleDriver.new()
+	vehicle.autopilot = GSVehicleDriver.new()
 	vehicle.autopilot.set_target(Vector3(0, 1, -40))
 
 	for i in 5:
 		spawner.tick(0.05)
 
 	t._check(
-		vehicle.autopilot.state == DotVehicleDriver.State.DRIVING,
+		vehicle.autopilot.state == GSVehicleDriver.State.DRIVING,
 		"an empty vehicle with an autopilot is driven by it"
 	)
 
 	# And a person takes it over rather than fighting it for the wheel.
 	var rider: CharacterBody3D = t._rider()
 	spawner.ride.enter(vehicle, &"alice", rider)
-	spawner.set_command(vehicle.instance_id, &"alice", DotVehicleCommand.make(0.0, 0.0, 1.0))
+	spawner.set_command(vehicle.instance_id, &"alice", GSVehicleCommand.make(0.0, 0.0, 1.0))
 
 	var before := vehicle.autopilot.index
 	for i in 5:

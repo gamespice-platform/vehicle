@@ -8,7 +8,7 @@ extends "res://examples/vehicle_selftest_handover.gd"
 func _test_net_sync() -> void:
 	_section("replication")
 
-	var specs := DotVehicleNetSync.specs()
+	var specs := GSVehicleNetSync.specs()
 	_check(specs.size() == 8, "there is a spec for what crosses the wire",
 		"%d" % specs.size())
 
@@ -23,7 +23,7 @@ func _test_net_sync() -> void:
 	var rolled := Basis(Vector3.FORWARD, deg_to_rad(70.0))
 	jeep.node.global_transform = Transform3D(rolled, Vector3(3, 1, -4))
 
-	DotVehicleNetSync.pull(jeep, probe)
+	GSVehicleNetSync.pull(jeep, probe)
 
 	_check(probe.net_x == 3.0 and probe.net_z == -4.0, "a pull copies the position")
 	_check(probe.net_health == 100, "and an indestructible vehicle reads as full health",
@@ -31,7 +31,7 @@ func _test_net_sync() -> void:
 
 	var node := Node3D.new()
 	_world.add_child(node)
-	DotVehicleNetSync.apply(node, probe)
+	GSVehicleNetSync.apply(node, probe)
 
 	var received := node.global_transform.basis.get_rotation_quaternion()
 	var sent := rolled.get_rotation_quaternion()
@@ -48,17 +48,17 @@ func _test_net_sync() -> void:
 	)
 
 	_check(
-		DotVehicleNetSync.is_seat_occupied(probe.net_occupancy, 0),
+		GSVehicleNetSync.is_seat_occupied(probe.net_occupancy, 0),
 		"the driver's seat reads as occupied"
 	)
 	_check(
-		not DotVehicleNetSync.is_seat_occupied(probe.net_occupancy, 1),
+		not GSVehicleNetSync.is_seat_occupied(probe.net_occupancy, 1),
 		"and the empty one does not"
 	)
 
 	for degrees in [-30.0, 0.0, 12.5, 32.0]:
-		var back := DotVehicleNetSync.dequantise_steering(
-			DotVehicleNetSync.quantise_steering(deg_to_rad(degrees))
+		var back := GSVehicleNetSync.dequantise_steering(
+			GSVehicleNetSync.quantise_steering(deg_to_rad(degrees))
 		)
 		_check(
 			absf(rad_to_deg(back) - degrees) < 1.0,
@@ -150,7 +150,7 @@ func _test_deferred_queries() -> void:
 	spawner.ride.enter(jeep, &"alice", rider)
 	await get_tree().physics_frame
 
-	var cmd := DotVehicleCommand.make(0.0)
+	var cmd := GSVehicleCommand.make(0.0)
 	cmd.exit_requested = true
 	var reply := spawner.set_command(jeep.instance_id, &"alice", cmd)
 	_check(reply.ok, "an exit request is accepted between ticks")
@@ -169,7 +169,7 @@ func _test_deferred_queries() -> void:
 	await get_tree().physics_frame
 	var _roof := _wall(Vector3(50, 1.0, 0), Vector3(14, 3, 14))
 	await get_tree().physics_frame
-	var blocked := DotVehicleCommand.make(0.0)
+	var blocked := GSVehicleCommand.make(0.0)
 	blocked.exit_requested = true
 	spawner.set_command(boxed.instance_id, &"bob", blocked)
 	_check(refusals.is_empty(), "a refusal is not reported before the tick")

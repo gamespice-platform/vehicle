@@ -1,4 +1,4 @@
-class_name DotVehicleSpray
+class_name GSVehicleSpray
 extends CPUParticles3D
 
 ## Water thrown up behind a vehicle's tyres on a wet road: a mist plume that grows with speed.

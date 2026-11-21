@@ -1,4 +1,4 @@
-class_name DotVehicleExplosion
+class_name GSVehicleExplosion
 extends Node3D
 
 ## A vehicle's explosion, drawn: a fireball, a column of black smoke, sparks, a flash of light
@@ -10,11 +10,11 @@ const LIFETIME := 9.0
 
 ## Puts an explosion at [param at] under [param parent] and returns it. [param power] 1 is a
 ## truck; 2 is twice the size.
-static func spawn(parent: Node, at: Vector3, power: float = 1.0) -> DotVehicleExplosion:
+static func spawn(parent: Node, at: Vector3, power: float = 1.0) -> GSVehicleExplosion:
 	if parent == null or not parent.is_inside_tree():
 		return null
 
-	var boom := DotVehicleExplosion.new()
+	var boom := GSVehicleExplosion.new()
 	boom.name = "Explosion"
 	parent.add_child(boom)
 	boom.global_position = at

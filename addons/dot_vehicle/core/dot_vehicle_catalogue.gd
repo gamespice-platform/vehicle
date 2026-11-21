@@ -1,11 +1,11 @@
 @tool
-class_name DotVehicleCatalogue
+class_name GSVehicleCatalogue
 extends Resource
 
 ## Every vehicle a server offers, and the file an operator edits.
 ##
-## Same shape and the same reasoning as [code]DotPropCatalogue[/code] and
-## [code]DotNpcCatalogue[/code]: plain JSON, because the person maintaining it on a
+## Same shape and the same reasoning as [code]GSPropCatalogue[/code] and
+## [code]GSNpcCatalogue[/code]: plain JSON, because the person maintaining it on a
 ## community server is a person with a text editor; one bad entry does not condemn the
 ## file; an exact id match wins a search.
 
@@ -13,16 +13,16 @@ const CHANNEL := "vehicle.catalogue"
 
 const FORMAT_VERSION := 1
 
-@export var vehicles: Array[DotVehicleDef] = []
+@export var vehicles: Array[GSVehicleDef] = []
 
 @export var meta: Dictionary = {}
 
 var _by_id: Dictionary = {}
 
 
-func add(def: DotVehicleDef) -> DotResult:
+func add(def: GSVehicleDef) -> GSResult:
 	if def == null:
-		return DotResult.fail(DotError.CODE_INVALID, "No vehicle to add.")
+		return GSResult.fail(GSError.CODE_INVALID, "No vehicle to add.")
 
 	var valid := def.validate()
 
@@ -33,20 +33,20 @@ func add(def: DotVehicleDef) -> DotResult:
 		_reindex()
 
 	if _by_id.has(def.id):
-		var existing: DotVehicleDef = _by_id[def.id]
+		var existing: GSVehicleDef = _by_id[def.id]
 		vehicles[vehicles.find(existing)] = def
 		_by_id[def.id] = def
-		return DotResult.success(def)
+		return GSResult.success(def)
 
 	vehicles.append(def)
 	_by_id[def.id] = def
 
-	return DotResult.success(def)
+	return GSResult.success(def)
 
 
 ## Download every pack this catalogue's vehicles live in.
 ##
-## [b]Nothing used to fetch these.[/b] A DotVehicleDef has carried a `content_id` since it was
+## [b]Nothing used to fetch these.[/b] A GSVehicleDef has carried a `content_id` since it was
 ## written and it is serialised onto the wire, but no code anywhere asked GameSpice Cloud for
 ## one — so a delivered vehicle was refused with "that vehicle's content is not loaded",
 ## forever, on a server that had configured it perfectly. The refusal is correct and
@@ -60,9 +60,9 @@ func add(def: DotVehicleDef) -> DotResult:
 ## spawn path synchronous, which is what every caller of it already assumes.
 ##
 ## Non-fatal by construction: a pack that will not download leaves that vehicle
-## unspawnable and everything else working. See [method DotContent.ensure_all] for the
+## unspawnable and everything else working. See [method GSContent.ensure_all] for the
 ## shape of the answer.
-func ensure_content() -> DotResult:
+func ensure_content() -> GSResult:
 	if _by_id.size() != vehicles.size():
 		_reindex()
 
@@ -72,15 +72,15 @@ func ensure_content() -> DotResult:
 		if entry != null and String(entry.content_id) != "":
 			ids.append(String(entry.content_id))
 
-	return await DotContent.ensure_all(ids)
+	return await GSContent.ensure_all(ids)
 
 
-func get_vehicle(id: StringName) -> DotVehicleDef:
+func get_vehicle(id: StringName) -> GSVehicleDef:
 	if _by_id.size() != vehicles.size():
 		_reindex()
 
 	var found: Variant = _by_id.get(id)
-	return found if found is DotVehicleDef else null
+	return found if found is GSVehicleDef else null
 
 
 func has(id: StringName) -> bool:
@@ -124,8 +124,8 @@ func categories() -> PackedStringArray:
 	return out
 
 
-func in_category(category: StringName) -> Array[DotVehicleDef]:
-	var out: Array[DotVehicleDef] = []
+func in_category(category: StringName) -> Array[GSVehicleDef]:
+	var out: Array[GSVehicleDef] = []
 
 	for def in vehicles:
 		if def.enabled and def.category == category:
@@ -135,8 +135,8 @@ func in_category(category: StringName) -> Array[DotVehicleDef]:
 
 
 ## Vehicles with room for at least [param riders] people.
-func seating_at_least(riders: int) -> Array[DotVehicleDef]:
-	var out: Array[DotVehicleDef] = []
+func seating_at_least(riders: int) -> Array[GSVehicleDef]:
+	var out: Array[GSVehicleDef] = []
 
 	for def in vehicles:
 		if def.enabled and def.seat_count() >= riders:
@@ -146,9 +146,9 @@ func seating_at_least(riders: int) -> Array[DotVehicleDef]:
 
 
 ## Vehicles whose id or name contains [param text]. An exact id wins outright.
-func search(text: String, limit: int = 30) -> Array[DotVehicleDef]:
+func search(text: String, limit: int = 30) -> Array[GSVehicleDef]:
 	var needle := text.strip_edges().to_lower()
-	var out: Array[DotVehicleDef] = []
+	var out: Array[GSVehicleDef] = []
 
 	if needle == "":
 		return out
@@ -189,8 +189,8 @@ func to_dictionary() -> Dictionary:
 ## the operator has no vehicles at all rather than thirty-nine.
 static func from_dictionary(
 	data: Dictionary, rejected: PackedStringArray = PackedStringArray()
-) -> DotVehicleCatalogue:
-	var cat := DotVehicleCatalogue.new()
+) -> GSVehicleCatalogue:
+	var cat := GSVehicleCatalogue.new()
 	var rejected_before := rejected.size()
 
 	var raw: Variant = data.get("vehicles", [])
@@ -201,7 +201,7 @@ static func from_dictionary(
 				rejected.append("not an object")
 				continue
 
-			var added := cat.add(DotVehicleDef.from_dictionary(entry as Dictionary))
+			var added := cat.add(GSVehicleDef.from_dictionary(entry as Dictionary))
 
 			if not added.ok:
 				rejected.append(added.error.message if added.error != null else "invalid")
@@ -211,7 +211,7 @@ static func from_dictionary(
 	# surfaces much later as an unknown id from a spawn. WARN, and the same line the
 	# prop, map and NPC catalogues write for the same reason.
 	if rejected.size() > rejected_before:
-		DotLog.warn(CHANNEL, "some vehicle entries were dropped", {
+		GSLog.warn(CHANNEL, "some vehicle entries were dropped", {
 			"count": rejected.size() - rejected_before,
 			"entries": ", ".join(rejected.slice(rejected_before)),
 		})

@@ -1,10 +1,10 @@
 @tool
-class_name DotVehicleTunables
-extends DotConfig
+class_name GSVehicleTunables
+extends GSConfig
 
 ## How a vehicle handles, as numbers an operator can change without a build.
 ##
-## [b]A [DotConfig], for [DotFpsTunables]'s reason.[/b] Handling is the half of a
+## [b]A [GSConfig], for [GSFpsTunables]'s reason.[/b] Handling is the half of a
 ## vehicle that is wrong until somebody drives it, and the difference between a server
 ## that can be retuned in a file and one that cannot is the difference between an
 ## evening's iteration and a fortnight of rebuilds. Layered identically to everything
@@ -189,30 +189,30 @@ func steering_limit_at(speed: float) -> float:
 	return steering_limit() * lerpf(1.0, steering_speed_falloff, t)
 
 
-func validate() -> DotResult:
+func validate() -> GSResult:
 	if top_speed <= 0.0:
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"top_speed must be positive, or nothing ever accelerates.",
 			"%.1f" % top_speed
 		)
 
 	if mass <= 0.0:
-		return DotResult.fail(
-			DotError.CODE_INVALID, "A vehicle needs a positive mass.", "%.1f" % mass
+		return GSResult.fail(
+			GSError.CODE_INVALID, "A vehicle needs a positive mass.", "%.1f" % mass
 		)
 
 	if brake_force < engine_force * 0.5:
 		# Not fatal, and worth refusing anyway: a vehicle that cannot out-brake its own
 		# engine reads as having no brakes at all, and the operator who tuned the engine
 		# up is the one who will report it as a physics bug.
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"brake_force is less than half of engine_force, so this vehicle cannot stop itself.",
 			"%.0f N against %.0f N" % [brake_force, engine_force]
 		)
 
-	return DotResult.success(null)
+	return GSResult.success(null)
 
 
 func describe_summary() -> String:

@@ -1,9 +1,9 @@
-class_name DotVehicleDamage
+class_name GSVehicleDamage
 extends RefCounted
 
 ## What a vehicle has lost: parts that come off and wheels whose tyre has burst, as data. No node, no physics, no randomness.
 ## A hit is a change of speed (m/s) at a point, never a force, so one strengths table serves every vehicle; the nearest part takes most of it and hits below [member min_share] are ignored.
-## Deterministic so the server decides and a client only shows; [DotVehicleBreakage] feeds it hits and makes the losses physical.
+## Deterministic so the server decides and a client only shows; [GSVehicleBreakage] feeds it hits and makes the losses physical.
 
 ## How much of its strength a hit must reach before a part notices it at all.
 var min_share: float = 0.3
@@ -53,7 +53,7 @@ enum Wheel { INTACT, POPPED, LOST }
 
 
 ## One piece that can come off. [member node] names what is drawn (relative to the body), so
-## [DotVehicleBreakage] can throw it; [member mass] is taken off the body when it goes (a load).
+## [GSVehicleBreakage] can throw it; [member mass] is taken off the body when it goes (a load).
 class Part:
 	extends RefCounted
 	var id: StringName = &""
@@ -92,12 +92,12 @@ var wheels: Array[WheelState] = []
 
 
 ## Adds a part. Refuses a second with the same id or a strength that is not positive.
-func add_part(id: StringName, kind: StringName, centre: Vector3, strength: float, reach: float = 1.0, mass: float = 0.0, node: NodePath = NodePath("")) -> DotResult:
+func add_part(id: StringName, kind: StringName, centre: Vector3, strength: float, reach: float = 1.0, mass: float = 0.0, node: NodePath = NodePath("")) -> GSResult:
 	if id == &"" or parts.has(id):
-		return DotResult.fail(DotError.CODE_INVALID, "A part needs an id of its own.", String(id))
+		return GSResult.fail(GSError.CODE_INVALID, "A part needs an id of its own.", String(id))
 
 	if strength <= 0.0 or reach <= 0.0:
-		return DotResult.fail(DotError.CODE_INVALID, "A part's strength and reach are positive.", String(id))
+		return GSResult.fail(GSError.CODE_INVALID, "A part's strength and reach are positive.", String(id))
 
 	var part := Part.new()
 	part.id = id
@@ -108,7 +108,7 @@ func add_part(id: StringName, kind: StringName, centre: Vector3, strength: float
 	part.mass = maxf(mass, 0.0)
 	part.node = node
 	parts[id] = part
-	return DotResult.success(part)
+	return GSResult.success(part)
 
 
 ## Adds a wheel; its index is the order wheels were added in (a body's wheels in child order).

@@ -37,20 +37,20 @@ func _check(ok: bool, what: String, detail: String = "") -> void:
 		print("  FAIL  %s" % line)
 
 
-func _jeep() -> DotVehicleDef:
-	var def := DotVehicleDef.make(&"jeep", CAR)
+func _jeep() -> GSVehicleDef:
+	var def := GSVehicleDef.make(&"jeep", CAR)
 	def.category = &"car"
 	def.cost = 4
 
-	var driver := DotVehicleSeat.make(&"driver", true)
+	var driver := GSVehicleSeat.make(&"driver", true)
 	driver.seat_offset = Vector3(-0.4, 0.9, -0.4)
 
-	var passenger := DotVehicleSeat.make(&"passenger")
+	var passenger := GSVehicleSeat.make(&"passenger")
 	passenger.seat_offset = Vector3(0.4, 0.9, -0.4)
 
 	def.seats = [driver, passenger]
 
-	var tuning := DotVehicleTunables.new()
+	var tuning := GSVehicleTunables.new()
 	tuning.mass = 800.0
 	tuning.max_exit_speed = 4.0
 	def.tunables = tuning
@@ -58,39 +58,39 @@ func _jeep() -> DotVehicleDef:
 	return def
 
 
-func _catalogue() -> DotVehicleCatalogue:
-	var cat := DotVehicleCatalogue.new()
+func _catalogue() -> GSVehicleCatalogue:
+	var cat := GSVehicleCatalogue.new()
 	cat.add(_jeep())
 
-	var skiff := DotVehicleDef.make(&"skiff", SKIFF)
-	skiff.kind = DotVehicleDef.Kind.HOVER
+	var skiff := GSVehicleDef.make(&"skiff", SKIFF)
+	skiff.kind = GSVehicleDef.Kind.HOVER
 	skiff.category = &"boat"
-	skiff.seats = [DotVehicleSeat.make(&"driver", true)]
+	skiff.seats = [GSVehicleSeat.make(&"driver", true)]
 	cat.add(skiff)
 
-	var scripted := DotVehicleDef.make(&"scripted", SKIFF)
+	var scripted := GSVehicleDef.make(&"scripted", SKIFF)
 	scripted.chassis_script_path = "res://fixtures/reverse_chassis.gd"
-	scripted.seats = [DotVehicleSeat.make(&"driver", true)]
+	scripted.seats = [GSVehicleSeat.make(&"driver", true)]
 	cat.add(scripted)
 
-	var broken := DotVehicleDef.make(&"broken", SKIFF)
+	var broken := GSVehicleDef.make(&"broken", SKIFF)
 	broken.chassis_script_path = "res://fixtures/not_a_chassis.gd"
-	broken.seats = [DotVehicleSeat.make(&"driver", true)]
+	broken.seats = [GSVehicleSeat.make(&"driver", true)]
 	cat.add(broken)
 
-	var wreckable := DotVehicleDef.make(&"wreckable", SKIFF)
-	wreckable.kind = DotVehicleDef.Kind.CUSTOM
+	var wreckable := GSVehicleDef.make(&"wreckable", SKIFF)
+	wreckable.kind = GSVehicleDef.Kind.CUSTOM
 	wreckable.max_health = 200.0
 	wreckable.seats = [
-		DotVehicleSeat.make(&"driver", true), DotVehicleSeat.make(&"passenger")
+		GSVehicleSeat.make(&"driver", true), GSVehicleSeat.make(&"passenger")
 	]
 	cat.add(wreckable)
 
 	return cat
 
 
-func _spawner(budget: int = 0) -> DotVehicleSpawner:
-	var spawner := DotVehicleSpawner.new()
+func _spawner(budget: int = 0) -> GSVehicleSpawner:
+	var spawner := GSVehicleSpawner.new()
 	spawner.catalogue = _catalogue()
 	spawner.authoritative = true
 	spawner.world_budget = budget

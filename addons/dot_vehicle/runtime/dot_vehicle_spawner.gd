@@ -1,5 +1,5 @@
 @tool
-class_name DotVehicleSpawner
+class_name GSVehicleSpawner
 extends "dot_vehicle_lookup.gd"
 
 ## Spawns, drives, seats and removes vehicles. The node a game with vehicles adds.
@@ -19,12 +19,12 @@ extends "dot_vehicle_lookup.gd"
 ## [b]What IS honest is smoothing.[/b] A driver's client can interpolate the replicated
 ## transform toward where it is going, which hides the snapshot rate without inventing
 ## any physics. That is the game's to do in its renderer, and it is why
-## [DotVehicleNetSync] marks the transform interpolated.
+## [GSVehicleNetSync] marks the transform interpolated.
 ##
 ## [codeblock]
-## var vehicles := DotVehicleSpawner.new()
+## var vehicles := GSVehicleSpawner.new()
 ## vehicles.catalogue = catalogue
-## vehicles.world_ref = DotNodeRef.of_path(^"../World")
+## vehicles.world_ref = GSNodeRef.of_path(^"../World")
 ## vehicles.authoritative = true
 ## add_child(vehicles)
 ##
@@ -38,13 +38,13 @@ extends "dot_vehicle_lookup.gd"
 
 const CHANNEL := "vehicle"
 
-signal spawned(vehicle: DotVehicleInstance)
+signal spawned(vehicle: GSVehicleInstance)
 
 ## A vehicle left the world. [param reason] is one of the REASON_* constants.
-signal removed(vehicle: DotVehicleInstance, reason: StringName)
+signal removed(vehicle: GSVehicleInstance, reason: StringName)
 
 ## It was destroyed. Fired before [signal removed], while the node still exists.
-signal destroyed(vehicle: DotVehicleInstance, by: StringName)
+signal destroyed(vehicle: GSVehicleInstance, by: StringName)
 
 signal refused(owner_id: StringName, vehicle_id: StringName, reason: String)
 
@@ -53,17 +53,17 @@ const REASON_LEFT := &"left"
 const REASON_CLEANUP := &"cleanup"
 const REASON_ADMIN := &"admin"
 
-## Set in [member DotVehicleInstance.meta] on a vehicle whose node came from
+## Set in [member GSVehicleInstance.meta] on a vehicle whose node came from
 ## [method adopt] rather than from [method spawn].
 const META_ADOPTED := &"dot_vehicle_adopted"
 
 @export_group("Content")
 
-@export var catalogue: DotVehicleCatalogue = null
+@export var catalogue: GSVehicleCatalogue = null
 
 @export_group("Limits")
 
-## Most vehicles in the world at once, counted in [member DotVehicleDef.cost].
+## Most vehicles in the world at once, counted in [member GSVehicleDef.cost].
 ## 0 = unlimited.
 @export_range(0, 1000, 1) var world_budget: int = 40
 
@@ -84,7 +84,7 @@ const META_ADOPTED := &"dot_vehicle_adopted"
 @export_group("Wiring")
 
 ## Where spawned vehicles are added. Defaults to this node.
-@export var world_ref: DotNodeRef = null
+@export var world_ref: GSNodeRef = null
 
 @export_group("Role")
 
@@ -105,7 +105,7 @@ func _init() -> void:
 	# Built in `_init` rather than in `_ready`, because a host wires `on_seated` onto it
 	# straight after `new()` and before `add_child` — which is the order every example
 	# in this family is written in, and a null there is a crash in the host's own setup.
-	ride = DotVehicleRide.new()
+	ride = GSVehicleRide.new()
 
 
 func _ready() -> void:
@@ -113,7 +113,7 @@ func _ready() -> void:
 		return
 
 	if catalogue == null:
-		DotLog.warn(CHANNEL, "the vehicle spawner has no catalogue", {})
+		GSLog.warn(CHANNEL, "the vehicle spawner has no catalogue", {})
 
 
 ## One simulated tick: every vehicle applies the command it is holding.
@@ -137,10 +137,10 @@ func tick(delta: float) -> void:
 	for id in ids:
 		var found: Variant = _vehicles.get(id)
 
-		if not (found is DotVehicleInstance):
+		if not (found is GSVehicleInstance):
 			continue
 
-		var vehicle: DotVehicleInstance = found
+		var vehicle: GSVehicleInstance = found
 
 		if not vehicle.is_alive() or vehicle.chassis == null:
 			continue
@@ -156,7 +156,7 @@ func tick(delta: float) -> void:
 		if command == null and vehicle.autopilot != null:
 			command = vehicle.autopilot.drive(vehicle, delta)
 
-		(vehicle.chassis as DotVehicleChassis).drive(command, delta)
+		(vehicle.chassis as GSVehicleChassis).drive(command, delta)
 
 	_stepping = false
 
@@ -167,16 +167,16 @@ func tick(delta: float) -> void:
 ## command — a client is a program the player can edit, and a passenger who could send
 ## a throttle would be driving from the back seat.
 func set_command(
-	instance_id: int, rider_id: StringName, command: DotVehicleCommand
-) -> DotResult:
+	instance_id: int, rider_id: StringName, command: GSVehicleCommand
+) -> GSResult:
 	var vehicle := get_vehicle(instance_id)
 
 	if vehicle == null or not vehicle.is_alive():
-		return DotResult.fail(DotError.CODE_STATE, "That vehicle is not there.")
+		return GSResult.fail(GSError.CODE_STATE, "That vehicle is not there.")
 
 	if vehicle.driver() != rider_id:
-		return DotResult.fail(
-			DotError.CODE_FORBIDDEN, "You are not driving that vehicle."
+		return GSResult.fail(
+			GSError.CODE_FORBIDDEN, "You are not driving that vehicle."
 		)
 
 	vehicle.command = command
@@ -192,11 +192,11 @@ func set_command(
 		# any, comes from the ride's `refused` signal as it always did.
 		if not _stepping:
 			_deferred.append({"kind": &"exit", "id": instance_id, "rider": rider_id})
-			return DotResult.success(null)
+			return GSResult.success(null)
 
 		return ride.exit(vehicle, rider_id)
 
-	return DotResult.success(null)
+	return GSResult.success(null)
 
 
 ## Spawns one vehicle. Null on refusal, with [signal refused] emitted.
@@ -206,7 +206,7 @@ func spawn(
 	owner_id: StringName = &"",
 	orientation: Basis = Basis.IDENTITY,
 	entitlements: Callable = Callable()
-) -> DotVehicleInstance:
+) -> GSVehicleInstance:
 	if not authoritative:
 		_refuse(owner_id, vehicle_id, "This client may not spawn vehicles.")
 		return null
@@ -268,7 +268,7 @@ func spawn(
 ## Takes over a body somebody else created, and makes it a vehicle.
 ##
 ## [b]For a game whose things are already spawned by something else.[/b] game-playlot
-## is the case this exists for: everything in that world is a [code]DotPropInstance[/code]
+## is the case this exists for: everything in that world is a [code]GSPropInstance[/code]
 ## so that it counts against a budget, can be undone, goes when its owner leaves, and can
 ## be picked up by a physics gun — and a car a gravity gun cannot punt is not a sandbox
 ## car. Its prop spawner has already loaded the scene and put the body in the world by
@@ -291,7 +291,7 @@ func adopt(
 	vehicle_id: StringName,
 	owner_id: StringName = &"",
 	entitlements: Callable = Callable()
-) -> DotVehicleInstance:
+) -> GSVehicleInstance:
 	if not authoritative:
 		_refuse(owner_id, vehicle_id, "This client may not spawn vehicles.")
 		return null
@@ -339,9 +339,9 @@ func adopt(
 
 ## The half of a spawn that is not "make the node": bookkeeping, chassis, announcement.
 func _register(
-	body: Node3D, def: DotVehicleDef, owner_id: StringName
-) -> DotVehicleInstance:
-	var vehicle := DotVehicleInstance.new()
+	body: Node3D, def: GSVehicleDef, owner_id: StringName
+) -> GSVehicleInstance:
+	var vehicle := GSVehicleInstance.new()
 	vehicle.def = def
 	vehicle.node = body
 	vehicle.instance_id = body.get_instance_id()
@@ -365,7 +365,7 @@ func _register(
 		# The vehicle still exists, for GameSpice NPC's reason: deleting it would hide which
 		# scene was wrong. A car that will not drive is a thing an operator can see and
 		# name, and the warning beside it says what to fix.
-		DotLog.warn(CHANNEL, "a vehicle spawned without a chassis", {
+		GSLog.warn(CHANNEL, "a vehicle spawned without a chassis", {
 			"vehicle": String(def.id),
 			"why": built.error.message,
 		})
@@ -376,20 +376,20 @@ func _register(
 
 
 ## Whether [param owner_id] may spawn one more of [param def] right now.
-func may_spawn(def: DotVehicleDef, owner_id: StringName = &"") -> DotResult:
+func may_spawn(def: GSVehicleDef, owner_id: StringName = &"") -> GSResult:
 	if spawn_interval > 0.0 and _last_spawn.has(owner_id):
 		var elapsed := _now - float(_last_spawn[owner_id])
 
 		if elapsed < spawn_interval:
-			return DotResult.fail(
-				DotError.CODE_RATE_LIMITED,
+			return GSResult.fail(
+				GSError.CODE_RATE_LIMITED,
 				"Slow down.",
 				"%.2f s of %.2f s" % [elapsed, spawn_interval]
 			)
 
 	if world_budget > 0 and world_cost() + def.cost > world_budget:
-		return DotResult.fail(
-			DotError.CODE_QUOTA,
+		return GSResult.fail(
+			GSError.CODE_QUOTA,
 			"The server is at its vehicle limit.",
 			"%d of %d" % [world_cost(), world_budget]
 		)
@@ -398,44 +398,44 @@ func may_spawn(def: DotVehicleDef, owner_id: StringName = &"") -> DotResult:
 		var mine := owner_cost(owner_id)
 
 		if mine + def.cost > per_player_budget:
-			return DotResult.fail(
-				DotError.CODE_QUOTA,
+			return GSResult.fail(
+				GSError.CODE_QUOTA,
 				"You are at your vehicle limit.",
 				"%d of %d" % [mine, per_player_budget]
 			)
 
-	return DotResult.success(null)
+	return GSResult.success(null)
 
 
 ## Builds and binds the chassis a definition asks for, loaded by path when it names one (a
-## `class_name` cannot be resolved inside a mounted pack, see [DotVehicleChassis]).
-func attach_chassis(vehicle: DotVehicleInstance) -> DotResult:
+## `class_name` cannot be resolved inside a mounted pack, see [GSVehicleChassis]).
+func attach_chassis(vehicle: GSVehicleInstance) -> GSResult:
 	if vehicle == null or vehicle.def == null:
-		return DotResult.fail(DotError.CODE_INVALID, "No vehicle to build a chassis for.")
+		return GSResult.fail(GSError.CODE_INVALID, "No vehicle to build a chassis for.")
 
 	var def := vehicle.def
-	var chassis: DotVehicleChassis = null
+	var chassis: GSVehicleChassis = null
 
 	if def.chassis_script_path != "":
 		if not ResourceLoader.exists(def.chassis_script_path):
-			return DotResult.fail(
-				DotError.CODE_IO, "That chassis script is not here.",
+			return GSResult.fail(
+				GSError.CODE_IO, "That chassis script is not here.",
 				def.chassis_script_path
 			)
 
 		var script: Resource = load(def.chassis_script_path)
 
 		if not (script is GDScript):
-			return DotResult.fail(
-				DotError.CODE_INVALID, "That chassis is not a GDScript.",
+			return GSResult.fail(
+				GSError.CODE_INVALID, "That chassis is not a GDScript.",
 				def.chassis_script_path
 			)
 
 		var made: Variant = (script as GDScript).new()
 
-		if not (made is DotVehicleChassis):
-			return DotResult.fail(
-				DotError.CODE_INVALID,
+		if not (made is GSVehicleChassis):
+			return GSResult.fail(
+				GSError.CODE_INVALID,
 				"A chassis must extend dot_vehicle_chassis.gd.",
 				def.chassis_script_path
 			)
@@ -443,15 +443,15 @@ func attach_chassis(vehicle: DotVehicleInstance) -> DotResult:
 		chassis = made
 	else:
 		match def.kind:
-			DotVehicleDef.Kind.WHEELED:
-				chassis = DotVehicleWheeled.new()
-			DotVehicleDef.Kind.HOVER:
-				chassis = DotVehicleHover.new()
-			DotVehicleDef.Kind.CUSTOM:
+			GSVehicleDef.Kind.WHEELED:
+				chassis = GSVehicleWheeled.new()
+			GSVehicleDef.Kind.HOVER:
+				chassis = GSVehicleHover.new()
+			GSVehicleDef.Kind.CUSTOM:
 				# Driven by the game entirely. GameSpice Vehicle keeps the seats and the
 				# bookkeeping and touches nothing else, which is the whole meaning of
 				# the kind — so this is a success with no chassis, not a failure.
-				return DotResult.success(null)
+				return GSResult.success(null)
 
 	var bound := chassis.bind(vehicle, def.tuning())
 
@@ -460,7 +460,7 @@ func attach_chassis(vehicle: DotVehicleInstance) -> DotResult:
 
 	vehicle.chassis = chassis
 
-	return DotResult.success(chassis)
+	return GSResult.success(chassis)
 
 
 func _refuse(owner_id: StringName, vehicle_id: StringName, reason: String) -> void:
@@ -510,7 +510,7 @@ func destroy(instance_id: int, by: StringName = &"") -> bool:
 	return _destroy_now(vehicle, instance_id, by)
 
 
-func _destroy_now(vehicle: DotVehicleInstance, instance_id: int, by: StringName) -> bool:
+func _destroy_now(vehicle: GSVehicleInstance, instance_id: int, by: StringName) -> bool:
 	vehicle.health = 0.0
 	destroy_count += 1
 
@@ -525,7 +525,7 @@ func _destroy_now(vehicle: DotVehicleInstance, instance_id: int, by: StringName)
 	return remove(instance_id, REASON_DESTROYED)
 
 
-func _evacuate(vehicle: DotVehicleInstance) -> void:
+func _evacuate(vehicle: GSVehicleInstance) -> void:
 	# Copied, because `exit` erases from `occupants` and iterating a dictionary while
 	# erasing from it skips entries.
 	var riders: Array = vehicle.occupants.values().duplicate()
@@ -580,10 +580,10 @@ func remove(instance_id: int, reason: StringName = REASON_ADMIN) -> bool:
 
 	var found: Variant = _vehicles.get(instance_id)
 
-	if not (found is DotVehicleInstance):
+	if not (found is GSVehicleInstance):
 		return false
 
-	var vehicle: DotVehicleInstance = found
+	var vehicle: GSVehicleInstance = found
 
 	if not _stepping and not vehicle.is_empty():
 		if not _is_queued(&"remove", instance_id):
@@ -594,7 +594,7 @@ func remove(instance_id: int, reason: StringName = REASON_ADMIN) -> bool:
 	return _remove_now(vehicle, instance_id, reason)
 
 
-func _remove_now(vehicle: DotVehicleInstance, instance_id: int, reason: StringName) -> bool:
+func _remove_now(vehicle: GSVehicleInstance, instance_id: int, reason: StringName) -> bool:
 
 	if not vehicle.is_empty():
 		_evacuate(vehicle)
@@ -621,19 +621,19 @@ func _remove_now(vehicle: DotVehicleInstance, instance_id: int, reason: StringNa
 
 ## Breaks the reference between a vehicle and the chassis driving it. BOTH ends.
 ##
-## [b]A [DotVehicleInstance] holds its chassis and the chassis holds the vehicle, and two
+## [b]A [GSVehicleInstance] holds its chassis and the chassis holds the vehicle, and two
 ## [RefCounted]s pointing at each other are never collected.[/b] GDScript frees a
 ## [RefCounted] when its count reaches zero and has no cycle collector, so a pair that
 ## refers to each other survives the spawner, the game and the scene tree — and takes its
 ## definition, its tunables, its seats and its last command with it. Measured in
 ## game-buses-from-hell: 61 leaked objects and 8 leaked resources at exit, growing by one
 ## world's worth every time a suite built another one, with every `remove` path looking
-## correct because [member DotVehicleInstance.chassis] WAS being cleared. It is the other
+## correct because [member GSVehicleInstance.chassis] WAS being cleared. It is the other
 ## half of the pair that kept it alive.
 ##
 ## Called from [method remove] and from [method _exit_tree], because a spawner that is
 ## simply freed never removes anything.
-func _unbind(vehicle: DotVehicleInstance) -> void:
+func _unbind(vehicle: GSVehicleInstance) -> void:
 	if vehicle == null:
 		return
 
@@ -659,12 +659,12 @@ func _exit_tree() -> void:
 	for id in _vehicles:
 		var vehicle: Variant = _vehicles[id]
 
-		if vehicle is DotVehicleInstance:
+		if vehicle is GSVehicleInstance:
 			_unbind(vehicle)
 
 
 ## Whether this vehicle's node was created by somebody else. See [method adopt].
-static func is_adopted(vehicle: DotVehicleInstance) -> bool:
+static func is_adopted(vehicle: GSVehicleInstance) -> bool:
 	return vehicle != null and bool(vehicle.meta.get(META_ADOPTED, false))
 
 
@@ -711,12 +711,12 @@ func owner_left(owner_id: StringName) -> int:
 	return clear_owner(owner_id, REASON_LEFT)
 
 
-func _resolve_world() -> DotResult:
+func _resolve_world() -> GSResult:
 	if world_ref == null:
-		return DotResult.success(self)
+		return GSResult.success(self)
 
 	if _world != null and is_instance_valid(_world):
-		return DotResult.success(_world)
+		return GSResult.success(_world)
 
 	var resolved := world_ref.resolve(self)
 
@@ -725,7 +725,7 @@ func _resolve_world() -> DotResult:
 
 	_world = resolved.value
 
-	return DotResult.success(_world)
+	return GSResult.success(_world)
 
 
 func describe() -> Dictionary:
@@ -753,7 +753,7 @@ func describe_lines() -> PackedStringArray:
 	])
 
 	for id in _vehicles:
-		var vehicle: DotVehicleInstance = _vehicles[id]
+		var vehicle: GSVehicleInstance = _vehicles[id]
 		out.append("  %-16s %s, %d aboard, %.1f m/s" % [
 			String(vehicle.def.id),
 			String(vehicle.owner_id) if vehicle.owner_id != &"" else "map",

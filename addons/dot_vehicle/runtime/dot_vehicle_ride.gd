@@ -1,4 +1,4 @@
-class_name DotVehicleRide
+class_name GSVehicleRide
 extends RefCounted
 
 ## Getting in and getting out. The half of a vehicle every game gets wrong.
@@ -25,11 +25,11 @@ extends RefCounted
 const CHANNEL := "vehicle.ride"
 
 ## A rider got in.
-signal entered(vehicle: DotVehicleInstance, rider_id: StringName, seat: DotVehicleSeat)
+signal entered(vehicle: GSVehicleInstance, rider_id: StringName, seat: GSVehicleSeat)
 
 ## A rider got out. [param at] is where they were put down.
 signal exited(
-	vehicle: DotVehicleInstance, rider_id: StringName, seat: DotVehicleSeat, at: Vector3
+	vehicle: GSVehicleInstance, rider_id: StringName, seat: GSVehicleSeat, at: Vector3
 )
 
 ## An enter or exit was refused, and why. For telling the player.
@@ -63,7 +63,7 @@ var carry_rider_nodes: bool = true
 
 ## Rider id -> instance id of the vehicle they are in.
 ##
-## The reverse index of [member DotVehicleInstance.occupants]. Both exist because both
+## The reverse index of [member GSVehicleInstance.occupants]. Both exist because both
 ## questions are asked constantly: "who is in this vehicle" when it explodes, and "what
 ## is this player in" on every frame of their own input.
 var _rider_vehicle: Dictionary = {}
@@ -82,11 +82,11 @@ var refusal_count: int = 0
 ##
 ## [param rider_node] may be null for a game that does not carry rider nodes.
 func enter(
-	vehicle: DotVehicleInstance,
+	vehicle: GSVehicleInstance,
 	rider_id: StringName,
 	rider_node: Node3D = null,
 	seat_id: StringName = &""
-) -> DotResult:
+) -> GSResult:
 	if vehicle == null or not vehicle.is_alive():
 		return _refuse(rider_id, &"", "That vehicle is not there any more.")
 
@@ -127,15 +127,15 @@ func enter(
 
 	entered.emit(vehicle, rider_id, seat)
 
-	return DotResult.success(seat)
+	return GSResult.success(seat)
 
 
 ## Parks the rider's node in the seat and remembers what it was doing.
 func _stow(
 	rider_id: StringName,
 	rider_node: Node3D,
-	vehicle: DotVehicleInstance,
-	seat: DotVehicleSeat
+	vehicle: GSVehicleInstance,
+	seat: GSVehicleSeat
 ) -> void:
 	var attach: Node = vehicle.node
 
@@ -149,7 +149,7 @@ func _stow(
 			# rider still has to go somewhere. Falling back to the root is right; doing
 			# it silently is not, because the seat will be a metre out for ever and
 			# nobody will know which of the two things is wrong.
-			DotLog.warn(CHANNEL, "a seat names a node its vehicle does not have", {
+			GSLog.warn(CHANNEL, "a seat names a node its vehicle does not have", {
 				"vehicle": String(vehicle.def.id),
 				"seat": String(seat.id),
 				"path": String(seat.attach_path),
@@ -193,8 +193,8 @@ func _stow(
 
 ## Takes [param rider_id] out of whatever they are in, if there is room to stand.
 func exit(
-	vehicle: DotVehicleInstance, rider_id: StringName, force: bool = false
-) -> DotResult:
+	vehicle: GSVehicleInstance, rider_id: StringName, force: bool = false
+) -> GSResult:
 	if vehicle == null or not vehicle.is_alive():
 		# The vehicle went away underneath them — destroyed, or removed by an admin.
 		# The bookkeeping still has to be undone or the rider can never enter anything
@@ -241,8 +241,8 @@ func exit(
 
 ## Whether anybody may get out of [param vehicle] right now.
 func may_exit(
-	vehicle: DotVehicleInstance, tunables: DotVehicleTunables = null
-) -> DotResult:
+	vehicle: GSVehicleInstance, tunables: GSVehicleTunables = null
+) -> GSResult:
 	var tuning := tunables if tunables != null else vehicle.def.tuning()
 
 	# Checked FIRST, and it overrides the speed rule rather than adding to it.
@@ -252,16 +252,16 @@ func may_exit(
 	# sliding is a rule that kills them, and they will report it as the vehicle being
 	# broken rather than as a rule.
 	if vehicle.is_inverted() and tuning.allow_exit_when_inverted:
-		return DotResult.success(null)
+		return GSResult.success(null)
 
 	if tuning.max_exit_speed > 0.0 and vehicle.speed() > tuning.max_exit_speed:
-		return DotResult.fail(
-			DotError.CODE_STATE,
+		return GSResult.fail(
+			GSError.CODE_STATE,
 			"You are going too fast to get out.",
 			"%.1f m/s of %.1f m/s" % [vehicle.speed(), tuning.max_exit_speed]
 		)
 
-	return DotResult.success(null)
+	return GSResult.success(null)
 
 
 ## Where [param seat]'s rider would be put down, or a refusal.
@@ -270,10 +270,10 @@ func may_exit(
 ## because a game wants to grey out the "get out" prompt rather than let a player press
 ## it and be told no.
 func find_exit_position(
-	vehicle: DotVehicleInstance, seat: DotVehicleSeat
-) -> DotResult:
+	vehicle: GSVehicleInstance, seat: GSVehicleSeat
+) -> GSResult:
 	if vehicle == null or not vehicle.is_alive() or seat == null:
-		return DotResult.fail(DotError.CODE_INVALID, "Nothing to get out of.")
+		return GSResult.fail(GSError.CODE_INVALID, "Nothing to get out of.")
 
 	var transform := vehicle.node.global_transform
 	var space := vehicle.node.get_world_3d().direct_space_state
@@ -282,7 +282,7 @@ func find_exit_position(
 		# No physics world means nothing to be blocked by. Returning a refusal here
 		# would make every exit impossible in a scene that has not been added to a
 		# viewport, which is the state a suite building a vehicle by hand is in.
-		return DotResult.success(transform * seat.exit_offsets[0])
+		return GSResult.success(transform * seat.exit_offsets[0])
 
 	var shape := CapsuleShape3D.new()
 	shape.radius = seat.exit_clearance
@@ -302,10 +302,10 @@ func find_exit_position(
 		query.transform = Transform3D(Basis.IDENTITY, candidate + Vector3.UP * seat.exit_height * 0.5)
 
 		if space.intersect_shape(query, 1).is_empty():
-			return DotResult.success(candidate)
+			return GSResult.success(candidate)
 
-	return DotResult.fail(
-		DotError.CODE_STATE,
+	return GSResult.fail(
+		GSError.CODE_STATE,
 		"There is no room to get out here.",
 		"%d places tried" % seat.exit_offsets.size()
 	)
@@ -317,7 +317,7 @@ func find_exit_position(
 ## before the sweep would block their own exit, and a second passenger sitting where the
 ## first is about to stand would block theirs — which is a two-seater nobody can get out
 ## of, and it only happens with two people in it.
-func _exclusions(vehicle: DotVehicleInstance) -> Array[RID]:
+func _exclusions(vehicle: GSVehicleInstance) -> Array[RID]:
 	var out: Array[RID] = []
 
 	var body := vehicle.body()
@@ -345,13 +345,13 @@ func _exclusions(vehicle: DotVehicleInstance) -> Array[RID]:
 
 
 ## Undoes the stow: puts the node back where it came from, at [param at].
-func _eject(rider_id: StringName, at: Vector3) -> DotResult:
+func _eject(rider_id: StringName, at: Vector3) -> GSResult:
 	_rider_vehicle.erase(rider_id)
 
 	var found: Variant = _stowed.get(rider_id)
 
 	if not (found is Dictionary):
-		return DotResult.success(at)
+		return GSResult.success(at)
 
 	var record: Dictionary = found
 	_stowed.erase(rider_id)
@@ -360,7 +360,7 @@ func _eject(rider_id: StringName, at: Vector3) -> DotResult:
 	var raw_node: Variant = record.get("node")
 
 	if not is_instance_valid(raw_node):
-		return DotResult.success(at)
+		return GSResult.success(at)
 
 	var node := raw_node as Node3D
 
@@ -377,8 +377,8 @@ func _eject(rider_id: StringName, at: Vector3) -> DotResult:
 		# The world they came from is gone — a map change, or their spawn point being
 		# freed. Left in the vehicle's tree rather than orphaned, because an orphaned
 		# node leaks and a node in the wrong parent is visible.
-		return DotResult.fail(
-			DotError.CODE_STATE,
+		return GSResult.fail(
+			GSError.CODE_STATE,
 			"The rider's world went away while they were riding.",
 			String(rider_id)
 		)
@@ -390,7 +390,7 @@ func _eject(rider_id: StringName, at: Vector3) -> DotResult:
 		collider.collision_layer = int(record.get("layer", 1))
 		collider.collision_mask = int(record.get("mask", 1))
 
-	return DotResult.success(at)
+	return GSResult.success(at)
 
 
 # --- Queries ------------------------------------------------------------------
@@ -410,11 +410,11 @@ func rider_count() -> int:
 
 func _refuse(
 	rider_id: StringName, vehicle_id: StringName, reason: String
-) -> DotResult:
+) -> GSResult:
 	refusal_count += 1
 	refused.emit(rider_id, vehicle_id, reason)
 
-	return DotResult.fail(DotError.CODE_FORBIDDEN, reason)
+	return GSResult.fail(GSError.CODE_FORBIDDEN, reason)
 
 
 func describe() -> Dictionary:

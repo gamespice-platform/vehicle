@@ -1,7 +1,7 @@
-class_name DotVehicleBreakage
+class_name GSVehicleBreakage
 extends Node
 
-## Makes a [DotVehicleDamage] physical on one vehicle body: it feels the hits, takes the parts
+## Makes a [GSVehicleDamage] physical on one vehicle body: it feels the hits, takes the parts
 ## off, and makes what is lost change the drive. A child of the body.
 ##
 ## [b]What it feels.[/b] Each physics step, the impulses on the body's own collision shapes
@@ -12,9 +12,9 @@ extends Node
 ##
 ## [b]What a loss does.[/b] A part's node is thrown (into [member debris], or hidden when there is
 ## none) and its mass leaves the body. A burst tyre rolls on a smaller radius with
-## [member DotVehicleDamage.popped_grip] of its grip and thumps once a turn; a lost wheel's
-## corner drops onto its hub ([member DotVehicleDamage.hub_radius]), stops driving, and drags
-## (the pull to that side). The grip goes through [method DotVehicleWheeled.set_wheel_grip], so
+## [member GSVehicleDamage.popped_grip] of its grip and thumps once a turn; a lost wheel's
+## corner drops onto its hub ([member GSVehicleDamage.hub_radius]), stops driving, and drags
+## (the pull to that side). The grip goes through [method GSVehicleWheeled.set_wheel_grip], so
 ## a game that changes the road's grip keeps the loss.
 ##
 ## [b]Who decides.[/b] [member simulate] is the server (or offline); a client's mirror sets it
@@ -23,7 +23,7 @@ extends Node
 
 const CHANNEL := "vehicle.breakage"
 
-## A part came off, a tyre burst or a wheel came away. [param event] is [DotVehicleDamage]'s
+## A part came off, a tyre burst or a wheel came away. [param event] is [GSVehicleDamage]'s
 ## with [code]at[/code] (world position) and [code]velocity[/code] (what the piece left with) added.
 signal broke(event: Dictionary)
 
@@ -35,14 +35,14 @@ signal scraping(wheel: int, at: Vector3, speed: float)
 ## anything: what a wreck counts its impacts by.
 signal impact(local_at: Vector3, dv: float)
 
-var damage: DotVehicleDamage = null
+var damage: GSVehicleDamage = null
 var body: RigidBody3D = null
 
 ## The chassis whose wheels' grip is written; null for a body something else drives.
-var chassis: DotVehicleWheeled = null
+var chassis: GSVehicleWheeled = null
 
 ## Where thrown parts go. Null (a dedicated server) hides them instead.
-var debris: DotVehicleDebris = null
+var debris: GSVehicleDebris = null
 
 ## False on a client's mirror: nothing is felt, losses arrive through [method apply_state].
 var simulate: bool = true
@@ -88,10 +88,10 @@ var _mirror_last: Vector3 = Vector3.ZERO
 
 ## Binds to [param p_body], its [param p_damage] and (for a wheeled body) its [param p_chassis].
 ## A damage with no wheels is given one per [VehicleWheel3D] child, at [param tyre_strength] and
-## [param hub_strength]. Part nodes are looked up now by [member DotVehicleDamage.Part.node].
-func setup(p_body: RigidBody3D, p_damage: DotVehicleDamage, p_chassis: DotVehicleWheeled = null, tyre_strength: float = 7.0, hub_strength: float = 12.0) -> DotResult:
+## [param hub_strength]. Part nodes are looked up now by [member GSVehicleDamage.Part.node].
+func setup(p_body: RigidBody3D, p_damage: GSVehicleDamage, p_chassis: GSVehicleWheeled = null, tyre_strength: float = 7.0, hub_strength: float = 12.0) -> GSResult:
 	if p_body == null or p_damage == null:
-		return DotResult.fail(DotError.CODE_INVALID, "Breakage needs a body and a damage model.")
+		return GSResult.fail(GSError.CODE_INVALID, "Breakage needs a body and a damage model.")
 
 	body = p_body
 	damage = p_damage
@@ -114,19 +114,19 @@ func setup(p_body: RigidBody3D, p_damage: DotVehicleDamage, p_chassis: DotVehicl
 		_last_point_v.append(Vector3.ZERO)
 
 	for id: StringName in damage.parts:
-		var part: DotVehicleDamage.Part = damage.parts[id]
+		var part: GSVehicleDamage.Part = damage.parts[id]
 		if not part.node.is_empty():
 			var node := body.get_node_or_null(part.node) as Node3D
 			if node != null:
 				_parts[id] = node
 			else:
-				DotLog.warn(CHANNEL, "part node not found; it will not be hidden or thrown", {"part": str(id), "path": str(part.node)})
+				GSLog.warn(CHANNEL, "part node not found; it will not be hidden or thrown", {"part": str(id), "path": str(part.node)})
 
 	if simulate:
 		body.contact_monitor = true
 		body.max_contacts_reported = maxi(body.max_contacts_reported, 8)
 
-	return DotResult.success(self)
+	return GSResult.success(self)
 
 
 ## The node drawn for part [param id], if any.
@@ -154,7 +154,7 @@ func show_events(events: Array[Dictionary], local_at: Vector3 = Vector3.ZERO, dv
 	_show(events, local_at, dv)
 
 
-## A server's [method DotVehicleDamage.to_dict], shown. [param velocities] is part id or
+## A server's [method GSVehicleDamage.to_dict], shown. [param velocities] is part id or
 ## "wheel<i>" -> the [Vector3] the piece left with (the server's [code]velocity[/code]).
 func apply_state(state: Dictionary, velocities: Dictionary = {}) -> Array[Dictionary]:
 	var events := damage.apply_dict(state)
@@ -255,7 +255,7 @@ func _drive_wheels(delta: float) -> void:
 		var state := damage.wheel_state(i)
 		var worn := damage.wear_of(i)
 
-		if state == DotVehicleDamage.Wheel.INTACT and worn < 0.3:
+		if state == GSVehicleDamage.Wheel.INTACT and worn < 0.3:
 			continue
 
 		var wheel := _wheels[i]
@@ -265,7 +265,7 @@ func _drive_wheels(delta: float) -> void:
 		var speed := flat.length()
 
 		if not simulate:
-			if state == DotVehicleDamage.Wheel.INTACT:
+			if state == GSVehicleDamage.Wheel.INTACT:
 				continue
 			# A mirror is frozen and moved by snapshots: its speed is how far it went, and its
 			# wheels cast no rays, so the rim is taken to be on the road under the wheel.
@@ -277,28 +277,28 @@ func _drive_wheels(delta: float) -> void:
 		if not wheel.is_in_contact():
 			continue
 
-		if state == DotVehicleDamage.Wheel.INTACT:
+		if state == GSVehicleDamage.Wheel.INTACT:
 			# A worn tyre only shakes the wheel, in step with its turn.
 			_phase[i] += speed / maxf(wheel.wheel_radius, 0.05) * delta
 			var shake := sin(_phase[i]) * damage.worn_wobble * worn * worn * corner_load
 			body.apply_force(Vector3.UP * shake, offset)
 			continue
 
-		var drag_share := damage.popped_drag if state == DotVehicleDamage.Wheel.POPPED else damage.hub_drag
+		var drag_share := damage.popped_drag if state == GSVehicleDamage.Wheel.POPPED else damage.hub_drag
 
 		if speed > 0.2:
 			# Never more than stops the corner this step: a drag that overshoots is a shove.
 			var most := body.mass * speed / maxf(delta, 0.001) * 0.25
 			body.apply_force(-flat / speed * minf(drag_share * corner_load, most), offset)
 
-		if state == DotVehicleDamage.Wheel.POPPED:
+		if state == GSVehicleDamage.Wheel.POPPED:
 			_phase[i] += speed / maxf(wheel.wheel_radius, 0.05) * delta
 			var thump := sin(_phase[i]) * damage.popped_wobble * corner_load
 			body.apply_force(Vector3.UP * thump + body.global_basis.x * thump * 0.3, offset)
 
 		# Only a hub throws sparks: a burst tyre is still rubber on the road (its shreds are the
 		# "popped" event's to show).
-		if state == DotVehicleDamage.Wheel.LOST and speed > 2.0:
+		if state == GSVehicleDamage.Wheel.LOST and speed > 2.0:
 			scraping.emit(i, wheel.get_contact_point(), speed)
 
 	_mirror_last = body.global_position
@@ -329,7 +329,7 @@ func _point_velocity(local: Vector3) -> Vector3:
 
 
 func _lose_part(e: Dictionary, local_at: Vector3, dv: float) -> void:
-	var part: DotVehicleDamage.Part = damage.parts[e["id"]]
+	var part: GSVehicleDamage.Part = damage.parts[e["id"]]
 	e["at"] = body.to_global(part.centre)
 
 	if not e.has("velocity"):
@@ -370,9 +370,9 @@ func _set_wheel(i: int, _e: Dictionary) -> void:
 	_e["at"] = wheel.global_position
 
 	match state:
-		DotVehicleDamage.Wheel.POPPED:
+		GSVehicleDamage.Wheel.POPPED:
 			wheel.wheel_radius = _radius[i] * damage.popped_radius
-		DotVehicleDamage.Wheel.LOST:
+		GSVehicleDamage.Wheel.LOST:
 			wheel.wheel_radius = _radius[i] * damage.hub_radius
 			if not wheel.has_meta(&"dot_breakage_traction"):
 				wheel.set_meta(&"dot_breakage_traction", wheel.use_as_traction)
@@ -391,7 +391,7 @@ func _set_wheel(i: int, _e: Dictionary) -> void:
 			if not child.has_meta(&"dot_breakage_scale"):
 				child.set_meta(&"dot_breakage_scale", (child as Node3D).scale)
 			var base: Vector3 = child.get_meta(&"dot_breakage_scale")
-			(child as Node3D).scale = base * (damage.popped_radius if state == DotVehicleDamage.Wheel.POPPED else 1.0 - 0.1 * damage.wear_of(i))
+			(child as Node3D).scale = base * (damage.popped_radius if state == GSVehicleDamage.Wheel.POPPED else 1.0 - 0.1 * damage.wear_of(i))
 
 
 func _throw_wheel(i: int, e: Dictionary, local_at: Vector3, dv: float) -> void:

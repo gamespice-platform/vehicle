@@ -13,13 +13,13 @@ func _test_entering() -> void:
 	var seated: Array[StringName] = []
 	# A captured Array rather than a counter: a GDScript lambda captures locals by
 	# VALUE, so a counter incremented in a callback stays zero outside it.
-	spawner.ride.on_seated = func(rider: StringName, _v: DotVehicleInstance, _s: DotVehicleSeat) -> void:
+	spawner.ride.on_seated = func(rider: StringName, _v: GSVehicleInstance, _s: GSVehicleSeat) -> void:
 		seated.append(rider)
 
 	var entered := spawner.ride.enter(jeep, &"alice", _rider())
 	_check(entered.ok, "a rider gets in")
 	_check(
-		(entered.value as DotVehicleSeat).id == &"driver",
+		(entered.value as GSVehicleSeat).id == &"driver",
 		"and an empty vehicle seats them as the driver",
 		"definition order, which is what everybody expects and nobody specifies"
 	)
@@ -32,7 +32,7 @@ func _test_entering() -> void:
 	)
 
 	var second := spawner.ride.enter(jeep, &"bob", _rider())
-	_check(second.ok and (second.value as DotVehicleSeat).id == &"passenger",
+	_check(second.ok and (second.value as GSVehicleSeat).id == &"passenger",
 		"but is seated in the next free one")
 	_check(jeep.is_full(), "and the vehicle is full")
 
@@ -254,7 +254,7 @@ func _test_destruction() -> void:
 	_check(wreckable.health == 150.0, "and health comes off")
 
 	var wrecked: Array[StringName] = []
-	spawner.destroyed.connect(func(_v: DotVehicleInstance, by: StringName) -> void:
+	spawner.destroyed.connect(func(_v: GSVehicleInstance, by: StringName) -> void:
 		wrecked.append(by))
 
 	spawner.damage(wreckable.instance_id, 500.0, &"alice")

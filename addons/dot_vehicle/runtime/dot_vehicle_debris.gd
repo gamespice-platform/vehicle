@@ -1,4 +1,4 @@
-class_name DotVehicleDebris
+class_name GSVehicleDebris
 extends Node3D
 
 ## Where the pieces that come off a vehicle go: each a loose [RigidBody3D] that keeps the speed
@@ -9,9 +9,9 @@ extends Node3D
 ## on two machines, so a piece that could push a truck would put a server and its clients out
 ## of step. The pieces collide on [member collision_layer] against [member collision_mask] (a
 ## game sets the mask to its road and nothing that is driven), and a dedicated server, which
-## draws nothing, does not make any: [DotVehicleBreakage] with no debris node only hides what came
+## draws nothing, does not make any: [GSVehicleBreakage] with no debris node only hides what came
 ## off. Each machine throws its own from the server's list of what was lost
-## ([method DotVehicleDamage.to_dict]) and the velocity the server sent with it.
+## ([method GSVehicleDamage.to_dict]) and the velocity the server sent with it.
 
 ## How many pieces may lie about at once, every vehicle together.
 @export_range(1, 512, 1) var budget: int = 32

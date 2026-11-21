@@ -1,14 +1,14 @@
-class_name DotVehicleInstance
+class_name GSVehicleInstance
 extends RefCounted
 
 ## One vehicle in the world: its definition, its body, who is in it and its chassis.
 ##
-## [b]The state is kept here and not on the node[/b], for [DotPropInstance]'s reason:
+## [b]The state is kept here and not on the node[/b], for [GSPropInstance]'s reason:
 ## metadata on a node is invisible to anything that did not put it there and unreachable
 ## once the node is freed — and the moment a vehicle's state matters most is the moment
 ## it is destroyed with three people in it.
 
-var def: DotVehicleDef = null
+var def: GSVehicleDef = null
 
 ## The body in the world. May be freed; check with [method is_alive].
 var node: Node3D = null
@@ -38,10 +38,10 @@ var health: float = 0.0
 ## [b]Kept here rather than on the rider[/b] because the question asked far more often
 ## is "who is in this vehicle" — a shot that hit it, an explosion, a vehicle being
 ## removed with people in it — and a per-rider record would have to be scanned to answer
-## it. [DotVehicleRide] keeps the reverse index for the other direction.
+## it. [GSVehicleRide] keeps the reverse index for the other direction.
 var occupants: Dictionary = {}
 
-## The chassis driving it, or null for [constant DotVehicleDef.Kind.CUSTOM].
+## The chassis driving it, or null for [constant GSVehicleDef.Kind.CUSTOM].
 var chassis: RefCounted = null
 
 ## The command last accepted from the driver. Applied every tick until replaced.
@@ -50,7 +50,7 @@ var chassis: RefCounted = null
 ## frame rate and the vehicle is simulated at the server's tick rate, so a command that
 ## was consumed once would give a vehicle that accelerates in stutters on any client
 ## whose frame rate is below the tick rate — which is every client on a 128-tick server.
-var command: DotVehicleCommand = null
+var command: GSVehicleCommand = null
 
 ## Something driving this vehicle that is not a person.
 ##
@@ -58,7 +58,7 @@ var command: DotVehicleCommand = null
 ## used and this is ignored — a passenger climbing into a convoy lorry takes it over
 ## rather than fighting the autopilot for the wheel, which is the only behaviour that
 ## does not need explaining to a player.
-var autopilot: DotVehicleDriver = null
+var autopilot: GSVehicleDriver = null
 
 var meta: Dictionary = {}
 
@@ -145,7 +145,7 @@ func driver() -> StringName:
 
 
 ## The first seat nobody is in, or null. Definition order, so the driver comes first.
-func first_free_seat() -> DotVehicleSeat:
+func first_free_seat() -> GSVehicleSeat:
 	if def == null:
 		return null
 
@@ -182,6 +182,6 @@ func describe() -> Dictionary:
 
 
 func _to_string() -> String:
-	return "DotVehicleInstance(%s, %d aboard)" % [
+	return "GSVehicleInstance(%s, %d aboard)" % [
 		String(def.id) if def != null else "?", occupants.size()
 	]

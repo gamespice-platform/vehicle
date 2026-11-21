@@ -1,5 +1,5 @@
 @tool
-class_name DotVehicleSeat
+class_name GSVehicleSeat
 extends Resource
 
 ## One place a rider can be, as data.
@@ -8,7 +8,7 @@ extends Resource
 ## carried "put them down here" as a fixed offset is a way through walls: the vehicle is
 ## against a cliff, or upside down, or moving at 30 m/s, and the offset puts a player
 ## inside the rock. So a seat carries a [i]list of candidates in preference order[/i],
-## in the vehicle's local space, and [DotVehicleRide] sweeps them and refuses the exit
+## in the vehicle's local space, and [GSVehicleRide] sweeps them and refuses the exit
 ## when none of them is free. Refusing is the correct answer and every game that
 ## teleports the player anyway has the bug.
 
@@ -21,7 +21,7 @@ extends Resource
 ##
 ## [b]More than one is legal and it is not a mistake.[/b] A tank has a driver and a
 ## gunner; a two-stick vehicle has two drivers. What is not legal is a vehicle with
-## none, which [method DotVehicleDef.validate] refuses.
+## none, which [method GSVehicleDef.validate] refuses.
 @export var drives: bool = false
 
 ## Where the rider is parented, relative to the vehicle's root. Empty for the root.
@@ -76,8 +76,8 @@ extends Resource
 @export var meta: Dictionary = {}
 
 
-static func make(p_id: StringName, p_drives: bool = false) -> DotVehicleSeat:
-	var seat := DotVehicleSeat.new()
+static func make(p_id: StringName, p_drives: bool = false) -> GSVehicleSeat:
+	var seat := GSVehicleSeat.new()
 	seat.id = p_id
 	seat.drives = p_drives
 	seat.display_name = String(p_id).capitalize()
@@ -93,20 +93,20 @@ func aim_yaw_limit() -> float:
 	return deg_to_rad(aim_yaw_limit_deg)
 
 
-func validate() -> DotResult:
+func validate() -> GSResult:
 	if id == &"":
-		return DotResult.fail(DotError.CODE_INVALID, "A seat needs an id.")
+		return GSResult.fail(GSError.CODE_INVALID, "A seat needs an id.")
 
 	if exit_offsets.is_empty():
 		# Refused here rather than at exit time, because the moment a player discovers
 		# a seat with no way out is the moment they are already in it.
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"A seat with no exit offsets is a seat nobody can get out of.",
 			String(id)
 		)
 
-	return DotResult.success(null)
+	return GSResult.success(null)
 
 
 func to_dictionary() -> Dictionary:
@@ -142,8 +142,8 @@ func to_dictionary() -> Dictionary:
 	return out
 
 
-static func from_dictionary(data: Dictionary) -> DotVehicleSeat:
-	var seat := DotVehicleSeat.new()
+static func from_dictionary(data: Dictionary) -> GSVehicleSeat:
+	var seat := GSVehicleSeat.new()
 
 	seat.id = StringName(str(data.get("id", "")))
 	seat.display_name = str(data.get("name", ""))
@@ -194,4 +194,4 @@ func describe() -> Dictionary:
 
 
 func _to_string() -> String:
-	return "DotVehicleSeat(%s%s)" % [String(id), " driver" if drives else ""]
+	return "GSVehicleSeat(%s%s)" % [String(id), " driver" if drives else ""]

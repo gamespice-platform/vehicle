@@ -1,10 +1,10 @@
-class_name DotVehicleChassis
+class_name GSVehicleChassis
 extends RefCounted
 
 ## How a vehicle turns a command into motion. The subclass point for a kind that
 ## behaves differently — a boat, a hovercraft, something tracked.
 ##
-## [b]A [RefCounted] beside the body, not a script on it[/b], for [DotNpcBrain]'s
+## [b]A [RefCounted] beside the body, not a script on it[/b], for [GSNpcBrain]'s
 ## reason: the body is the definition's scene and belongs to whoever made it, and a
 ## chassis that had to be the scene's root script would mean one scene per handling
 ## model. It also means one scene serves several catalogue entries at different weights,
@@ -13,17 +13,17 @@ extends RefCounted
 ## [b]A delivered chassis extends this by PATH, never by name.[/b] A script inside a
 ## mounted GameSpice Cloud pack cannot resolve a [code]class_name[/code] —
 ## [code]extends "res://addons/dot_vehicle/runtime/dot_vehicle_chassis.gd"[/code] works
-## in a build and in a pack, and [code]extends DotVehicleChassis[/code] works in a build
+## in a build and in a pack, and [code]extends GSVehicleChassis[/code] works in a build
 ## only.
 ##
-## [b]This runs on the server only.[/b] See [DotVehicleSpawner] for why a vehicle is
+## [b]This runs on the server only.[/b] See [GSVehicleSpawner] for why a vehicle is
 ## not predicted.
 
 ## The vehicle this drives. Set before [method _setup].
-var vehicle: DotVehicleInstance = null
+var vehicle: GSVehicleInstance = null
 
-## Handling. Never null: [method DotVehicleDef.tuning] falls back to the defaults.
-var tunables: DotVehicleTunables = null
+## Handling. Never null: [method GSVehicleDef.tuning] falls back to the defaults.
+var tunables: GSVehicleTunables = null
 
 ## Where the steering actually is, in radians. Moves toward the command at the
 ## tunables' rate rather than jumping, which is what stops a keyboard being a switch.
@@ -32,12 +32,12 @@ var steering: float = 0.0
 
 # --- Called by the spawner ----------------------------------------------------
 
-func bind(p_vehicle: DotVehicleInstance, p_tunables: DotVehicleTunables) -> DotResult:
+func bind(p_vehicle: GSVehicleInstance, p_tunables: GSVehicleTunables) -> GSResult:
 	vehicle = p_vehicle
 	tunables = p_tunables
 
 	if vehicle == null or not vehicle.is_alive():
-		return DotResult.fail(DotError.CODE_INVALID, "No vehicle to drive.")
+		return GSResult.fail(GSError.CODE_INVALID, "No vehicle to drive.")
 
 	apply_body()
 
@@ -69,11 +69,11 @@ func apply_body() -> void:
 
 
 ## One simulated tick of driving.
-func drive(command: DotVehicleCommand, delta: float) -> void:
+func drive(command: GSVehicleCommand, delta: float) -> void:
 	if vehicle == null or not vehicle.is_alive() or tunables == null:
 		return
 
-	var cmd := command if command != null else DotVehicleCommand.new()
+	var cmd := command if command != null else GSVehicleCommand.new()
 	cmd.sanitise()
 
 	_advance_steering(cmd.steer, delta)
@@ -107,12 +107,12 @@ func _advance_steering(wanted: float, delta: float) -> void:
 # --- Subclass interface -------------------------------------------------------
 
 ## Called once, after the body is in the world and the tunables are on it.
-func _setup() -> DotResult:
-	return DotResult.success(null)
+func _setup() -> GSResult:
+	return GSResult.success(null)
 
 
 ## Called every simulated tick with a sanitised command.
-func _drive(_command: DotVehicleCommand, _delta: float) -> void:
+func _drive(_command: GSVehicleCommand, _delta: float) -> void:
 	pass
 
 

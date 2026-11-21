@@ -1,9 +1,9 @@
-class_name DotVehicleCommand
+class_name GSVehicleCommand
 extends RefCounted
 
 ## What a driver is asking the vehicle to do this tick.
 ##
-## [b]A command object rather than four arguments, for [code]DotFpsCommand[/code]'s
+## [b]A command object rather than four arguments, for [code]GSFpsCommand[/code]'s
 ## reason[/b] — it is the thing a client sends, a demo records and a bot fabricates, and
 ## every one of those wants to build it without a controller present.
 ##
@@ -11,7 +11,7 @@ extends RefCounted
 ## can simulate the same movement the server will; this one exists so a client can tell
 ## the server what it wants. A vehicle is rigid-body simulated and therefore not
 ## reproducible across machines, so the client sends this and draws what comes back.
-## See [DotVehicleSpawner] for the whole argument and for what was considered instead.
+## See [GSVehicleSpawner] for the whole argument and for what was considered instead.
 
 ## -1 (full reverse) to 1 (full throttle).
 var throttle: float = 0.0
@@ -42,8 +42,8 @@ var aim_pitch: float = 0.0
 
 static func make(
 	p_throttle: float = 0.0, p_steer: float = 0.0, p_brake: float = 0.0
-) -> DotVehicleCommand:
-	var cmd := DotVehicleCommand.new()
+) -> GSVehicleCommand:
+	var cmd := GSVehicleCommand.new()
 	cmd.throttle = p_throttle
 	cmd.steer = p_steer
 	cmd.brake = p_brake
@@ -60,14 +60,14 @@ static func make(
 ## A bot or a scripted manoeuvre that asks for reverse thrust while moving forward (a
 ## three-point turn settling between legs) means it, and a chassis that rewrote it would
 ## change every autopilot in the family. [param forward_speed] is
-## [method DotVehicleInstance.forward_speed], read where the command is applied, which is
+## [method GSVehicleInstance.forward_speed], read where the command is applied, which is
 ## the server for a vehicle.
 ##
 ## [b]Why the brake rather than reverse thrust:[/b] reverse is a fraction of the engine
-## ([member DotVehicleTunables.reverse_fraction]) and the brake is usually several times
+## ([member GSVehicleTunables.reverse_fraction]) and the brake is usually several times
 ## that, so a vehicle on reverse thrust took two to three times as far to stop as the key
 ## list promised (a 2 t bus from 15 m/s: 21 m against 7.6 m).
-func brake_then_reverse(forward_speed: float, stopped_below: float = STOPPED_BELOW) -> DotVehicleCommand:
+func brake_then_reverse(forward_speed: float, stopped_below: float = STOPPED_BELOW) -> GSVehicleCommand:
 	if throttle < 0.0 and forward_speed > stopped_below:
 		brake = maxf(brake, -throttle)
 		throttle = 0.0
@@ -84,7 +84,7 @@ func brake_then_reverse(forward_speed: float, stopped_below: float = STOPPED_BEL
 ## player can edit, and a throttle of 40 is 40 times the engine force with nothing
 ## erroring anywhere — the vehicle simply drives at an impossible speed and every other
 ## number stays plausible.
-func sanitise() -> DotVehicleCommand:
+func sanitise() -> GSVehicleCommand:
 	throttle = clampf(throttle, -1.0, 1.0)
 	steer = clampf(steer, -1.0, 1.0)
 	brake = clampf(brake, 0.0, 1.0)

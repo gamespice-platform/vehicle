@@ -1,4 +1,4 @@
-class_name DotRoadProfile
+class_name GSRoadProfile
 extends RefCounted
 
 ## A road's cross-section: its bank (superelevation, the whole deck tilted toward the inside
@@ -51,7 +51,7 @@ static func half_slopes(bank_slope: float, camber_slope: float) -> Vector2:
 	var why := check_camber(camber_slope)
 
 	if why != "":
-		push_error("DotRoadProfile: %s" % why)
+		push_error("GSRoadProfile: %s" % why)
 		return Vector2(bank_slope, bank_slope)
 
 	var e := bank_slope

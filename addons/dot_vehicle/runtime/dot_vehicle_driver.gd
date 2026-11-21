@@ -1,7 +1,7 @@
-class_name DotVehicleDriver
+class_name GSVehicleDriver
 extends RefCounted
 
-## Turns "go there" into a [DotVehicleCommand]. What lets something other than a
+## Turns "go there" into a [GSVehicleCommand]. What lets something other than a
 ## person drive.
 ##
 ## [b]The gap this fills.[/b] GameSpice Vehicle has always said a command is built by the
@@ -17,7 +17,7 @@ extends RefCounted
 ## place where driving is simulated.
 ##
 ## [codeblock]
-## var driver := DotVehicleDriver.new()
+## var driver := GSVehicleDriver.new()
 ## driver.set_route(PackedVector3Array([a, b, c]))
 ##
 ## # Every tick, on the server:
@@ -129,7 +129,7 @@ var index: int = 0
 
 var _stuck_for: float = 0.0
 var _reversing_for: float = 0.0
-var _last_command: DotVehicleCommand = null
+var _last_command: GSVehicleCommand = null
 
 
 # --- Where to go --------------------------------------------------------------
@@ -169,10 +169,10 @@ func is_last_waypoint() -> bool:
 # --- Driving ------------------------------------------------------------------
 
 ## One tick's command for a vehicle. The ordinary entry point.
-func drive(vehicle: DotVehicleInstance, delta: float) -> DotVehicleCommand:
+func drive(vehicle: GSVehicleInstance, delta: float) -> GSVehicleCommand:
 	if vehicle == null or not vehicle.is_alive():
 		state = State.IDLE
-		return DotVehicleCommand.new()
+		return GSVehicleCommand.new()
 
 	var transform := vehicle.node.global_transform
 
@@ -186,7 +186,7 @@ func drive(vehicle: DotVehicleInstance, delta: float) -> DotVehicleCommand:
 
 
 ## The same decision from raw numbers, for anything that is not a
-## [DotVehicleInstance] — and for a test with no physics server in it.
+## [GSVehicleInstance] — and for a test with no physics server in it.
 ##
 ## [param forward] and [param right] are the vehicle's own axes, so a vehicle on a
 ## banked corner steers in its own frame rather than in the world's. Both are
@@ -198,8 +198,8 @@ func drive_from(
 	right: Vector3,
 	velocity: Vector3,
 	delta: float
-) -> DotVehicleCommand:
-	var command := DotVehicleCommand.new()
+) -> GSVehicleCommand:
+	var command := GSVehicleCommand.new()
 
 	if not has_route():
 		state = State.ARRIVED if not route.is_empty() else State.IDLE
@@ -244,7 +244,7 @@ func drive_from(
 	# the question this state exists to answer, and a vehicle that gets stuck over and
 	# over at one spot is a route through something solid, which is the level's bug.
 	if state == State.REVERSING and not was_reversing:
-		DotLog.debug(CHANNEL, "a driven vehicle is stuck; reversing out", {
+		GSLog.debug(CHANNEL, "a driven vehicle is stuck; reversing out", {
 			"position": position.snapped(Vector3(0.1, 0.1, 0.1)),
 			"waypoint": index,
 			"of": route.size(),
@@ -256,7 +256,7 @@ func drive_from(
 	state = State.DRIVING
 
 	# +1 steers right, and right is +X in the vehicle's own basis. That is
-	# DotVehicleCommand's convention and not Godot's; DotVehicleWheeled flips it once,
+	# GSVehicleCommand's convention and not Godot's; GSVehicleWheeled flips it once,
 	# where the engine's own signs are documented.
 	command.steer = clampf(
 		signed_angle / deg_to_rad(maxf(steering_response_deg, 1.0)), -1.0, 1.0
@@ -352,8 +352,8 @@ func _track_stuck(speed: float, delta: float) -> void:
 
 
 func _reverse(
-	command: DotVehicleCommand, signed_angle: float, _delta: float
-) -> DotVehicleCommand:
+	command: GSVehicleCommand, signed_angle: float, _delta: float
+) -> GSVehicleCommand:
 	command.throttle = -1.0
 
 	var steer := clampf(
@@ -369,7 +369,7 @@ func _reverse(
 	return command
 
 
-func _finish(command: DotVehicleCommand) -> DotVehicleCommand:
+func _finish(command: GSVehicleCommand) -> GSVehicleCommand:
 	command.sanitise()
 	_last_command = command
 	return command
@@ -406,4 +406,4 @@ func describe_lines() -> PackedStringArray:
 
 
 func _to_string() -> String:
-	return "DotVehicleDriver(%s)" % state_name()
+	return "GSVehicleDriver(%s)" % state_name()

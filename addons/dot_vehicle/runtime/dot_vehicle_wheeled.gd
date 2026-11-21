@@ -1,5 +1,5 @@
-class_name DotVehicleWheeled
-extends DotVehicleChassis
+class_name GSVehicleWheeled
+extends GSVehicleChassis
 
 ## A car. Godot's [VehicleBody3D] with this addon's tunables written onto its wheels.
 ##
@@ -10,7 +10,7 @@ extends DotVehicleChassis
 ## the part that is already correct. What is [i]not[/i] already there is the half this
 ## class is: the wheel properties are exported per wheel in a scene, so a definition
 ## that wanted a heavier version of the same car would need a second scene, and a server
-## retuning grip would need a rebuild. Turning [DotVehicleTunables] into wheel
+## retuning grip would need a rebuild. Turning [GSVehicleTunables] into wheel
 ## properties at spawn is what makes handling data.
 ##
 ## [b]It needs a [VehicleBody3D] root with [VehicleWheel3D] children.[/b] Refused
@@ -38,17 +38,17 @@ var _handbrake_wheels: Array[VehicleWheel3D] = []
 var _rear_grip_held := false
 
 ## A wheel's own share of the grip (wheel -> fraction; absent is 1). What a burst tyre or a hub
-## on the road leaves ([DotVehicleBreakage]); multiplied into every grip this class writes, so a
+## on the road leaves ([GSVehicleBreakage]); multiplied into every grip this class writes, so a
 ## change of weather or the handbrake does not give a burst tyre its grip back.
 var _wheel_grip: Dictionary = {}
 
 
-func _setup() -> DotResult:
+func _setup() -> GSResult:
 	var body := vehicle.node as VehicleBody3D
 
 	if body == null:
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"A wheeled vehicle needs a VehicleBody3D at the root of its scene.",
 			String(vehicle.def.id) if vehicle.def != null else "?"
 		)
@@ -68,8 +68,8 @@ func _setup() -> DotResult:
 			_driven_wheels.append(wheel)
 
 	if _wheels.is_empty():
-		return DotResult.fail(
-			DotError.CODE_INVALID,
+		return GSResult.fail(
+			GSError.CODE_INVALID,
 			"A wheeled vehicle needs at least one VehicleWheel3D under its body.",
 			String(vehicle.def.id) if vehicle.def != null else "?"
 		)
@@ -77,7 +77,7 @@ func _setup() -> DotResult:
 	_pick_handbrake_wheels()
 	_apply_wheel_tunables()
 
-	return DotResult.success(self)
+	return GSResult.success(self)
 
 
 ## The handbrake acts on the wheels that do not steer, and on the rear half otherwise.
@@ -125,7 +125,7 @@ func _apply_wheel_tunables() -> void:
 	_rear_grip_held = false
 
 
-## The wheels, in child order: the order [DotVehicleDamage]'s wheels are numbered in.
+## The wheels, in child order: the order [GSVehicleDamage]'s wheels are numbered in.
 func wheels() -> Array[VehicleWheel3D]:
 	return _wheels
 
@@ -144,7 +144,7 @@ func wheel_grip(wheel: VehicleWheel3D) -> float:
 
 
 ## The rear wheels' grip with the handbrake held or not
-## ([member DotVehicleTunables.handbrake_grip_fraction]).
+## ([member GSVehicleTunables.handbrake_grip_fraction]).
 func _set_rear_grip(held: bool) -> void:
 	if held == _rear_grip_held:
 		return
@@ -158,7 +158,7 @@ func _set_rear_grip(held: bool) -> void:
 		wheel.wheel_friction_slip = grip * float(_wheel_grip.get(wheel, 1.0))
 
 
-func _drive(command: DotVehicleCommand, _delta: float) -> void:
+func _drive(command: GSVehicleCommand, _delta: float) -> void:
 	var body := vehicle.node as VehicleBody3D
 
 	if body == null:
@@ -176,7 +176,7 @@ func _drive(command: DotVehicleCommand, _delta: float) -> void:
 	# - `Basis(up, m_steering)` rotates about +Y, so a POSITIVE `steering` turns
 	#   **left**. Measured: `steering = +0.5` yaws -5.4 degrees over 150 ticks.
 	#
-	# `DotVehicleCommand` says forward is -Z and +1 steers right, because that is what
+	# `GSVehicleCommand` says forward is -Z and +1 steers right, because that is what
 	# the rest of this family says. The translation belongs here, once, rather than in
 	# every game that ever spawns a car.
 	body.steering = -steering

@@ -12,10 +12,10 @@ GameSpice Core is the only dependency.
 ## Use
 
 ```gdscript
-var vehicles := DotVehicleSpawner.new()
+var vehicles := GSVehicleSpawner.new()
 vehicles.authoritative = true                  # on the server only
 vehicles.catalogue = catalogue
-vehicles.world_ref = DotNodeRef.of_path(^"../World")
+vehicles.world_ref = GSNodeRef.of_path(^"../World")
 
 # Where the game stops the player's own controller and moves their camera.
 vehicles.ride.on_seated = _player_got_in
@@ -34,23 +34,23 @@ vehicles.tick(delta)
 A definition:
 
 ```gdscript
-var jeep := DotVehicleDef.make(&"jeep", "res://vehicles/jeep.tscn")
+var jeep := GSVehicleDef.make(&"jeep", "res://vehicles/jeep.tscn")
 
-var driver := DotVehicleSeat.make(&"driver", true)
+var driver := GSVehicleSeat.make(&"driver", true)
 driver.seat_offset = Vector3(-0.4, 0.9, -0.4)
 
-var gunner := DotVehicleSeat.make(&"gunner")
+var gunner := GSVehicleSeat.make(&"gunner")
 gunner.may_fire = true
 gunner.attach_path = ^"Turret"
 
 jeep.seats = [driver, gunner]
-jeep.tunables = handling          # a DotConfig: retunable in a file
+jeep.tunables = handling          # a GSConfig: retunable in a file
 catalogue.add(jeep)
 ```
 
 ## Getting out safely
 
-A player in a vehicle is a player whose controller must stop simulating, whose camera belongs to the vehicle, and who has to be put back somewhere legal on exit, even if the vehicle is upside down or moving fast. A seat carries candidate exit positions in preference order. `DotVehicleRide` sweeps a body-sized capsule at each, and refuses the exit when none is free.
+A player in a vehicle is a player whose controller must stop simulating, whose camera belongs to the vehicle, and who has to be put back somewhere legal on exit, even if the vehicle is upside down or moving fast. A seat carries candidate exit positions in preference order. `GSVehicleRide` sweeps a body-sized capsule at each, and refuses the exit when none is free.
 
 ## Server-authoritative
 
@@ -63,16 +63,16 @@ Rigid-body physics is not identical on two machines, so the server simulates veh
 | `WHEELED` | Godot's `VehicleBody3D` with the tunables written onto its wheels. |
 | `HOVER` | Raycast suspension on a plain `RigidBody3D`: hovercraft, skiff, barge. |
 | `CUSTOM` | Your game drives it; GameSpice Vehicle keeps the seats and bookkeeping. |
-| Your own | A `DotVehicleChassis` subclass, named by path so a GameSpice Cloud pack can deliver it. |
+| Your own | A `GSVehicleChassis` subclass, named by path so a GameSpice Cloud pack can deliver it. |
 
-Godot's `VehicleBody3D` drives along +Z for a positive `engine_force` and turns left for a positive `steering`. `DotVehicleCommand` uses the family's usual conventions and `DotVehicleWheeled` does the translation, so games never have to.
+Godot's `VehicleBody3D` drives along +Z for a positive `engine_force` and turns left for a positive `steering`. `GSVehicleCommand` uses the family's usual conventions and `GSVehicleWheeled` does the translation, so games never have to.
 
 ## Driving without a person
 
-`DotVehicleDriver` produces commands from a route, for bots or delivery vehicles.
+`GSVehicleDriver` produces commands from a route, for bots or delivery vehicles.
 
 ```gdscript
-var driver := DotVehicleDriver.new()
+var driver := GSVehicleDriver.new()
 driver.target_speed = 16.0
 driver.set_route(PackedVector3Array([checkpoint_a, checkpoint_b, depot]))
 
