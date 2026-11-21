@@ -155,7 +155,7 @@ extends GSConfig
 
 
 func env_prefix() -> String:
-	return "DOT_VEHICLE_"
+	return "GS_VEHICLE_"
 
 
 func cli_prefix() -> String:

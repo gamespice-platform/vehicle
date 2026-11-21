@@ -18,15 +18,15 @@ Read the family [CLAUDE.md](../../CLAUDE.md) first; this file is only what is sp
 
 | Path | What |
 | --- | --- |
-| `addons/dot_vehicle/core/` | `GSVehicleDef` (checkable without a scene), `GSVehicleCatalogue` (JSON an operator edits), `GSVehicleSeat`, `GSVehicleTunables` (a `GSConfig`), `GSVehicleCommand` (one tick of intent), `GSVehicleInstance`, `GSVehicleDamage` (what has come off, as data), `GSRoadProfile` (a road deck's cross-section: bank and camber, for a game that builds its own road mesh) |
-| `addons/dot_vehicle/runtime/` | `GSVehicleSpawner` (the node a game adds; owns the ride), `GSVehicleRide` (the handover), `GSVehicleChassis` (the subclass point), `GSVehicleWheeled`, `GSVehicleHover`, `GSVehicleDriver`, `GSVehicleBreakage` (hits, burst tyres, lost wheels, parts thrown), `GSVehicleDebris` (the budgeted loose pieces), `GSVehicleWreck` (a crash: tumble, parts torn off by every knock, an explosion event, smoke and fire that follow the damage), `GSVehicleExplosion` (the fireball, drawn) |
-| `addons/dot_vehicle/net/` | `GSVehicleNetSync`: what replicates, as strings; never names GameSpice Net |
+| `addons/gs_vehicle/core/` | `GSVehicleDef` (checkable without a scene), `GSVehicleCatalogue` (JSON an operator edits), `GSVehicleSeat`, `GSVehicleTunables` (a `GSConfig`), `GSVehicleCommand` (one tick of intent), `GSVehicleInstance`, `GSVehicleDamage` (what has come off, as data), `GSRoadProfile` (a road deck's cross-section: bank and camber, for a game that builds its own road mesh) |
+| `addons/gs_vehicle/runtime/` | `GSVehicleSpawner` (the node a game adds; owns the ride), `GSVehicleRide` (the handover), `GSVehicleChassis` (the subclass point), `GSVehicleWheeled`, `GSVehicleHover`, `GSVehicleDriver`, `GSVehicleBreakage` (hits, burst tyres, lost wheels, parts thrown), `GSVehicleDebris` (the budgeted loose pieces), `GSVehicleWreck` (a crash: tumble, parts torn off by every knock, an explosion event, smoke and fire that follow the damage), `GSVehicleExplosion` (the fireball, drawn) |
+| `addons/gs_vehicle/net/` | `GSVehicleNetSync`: what replicates, as strings; never names GameSpice Net |
 | `fixtures/` | scenes and a chassis-by-path for the suite |
 | `examples/vehicle_selftest.tscn` | the suite; real bodies through real physics frames |
 
 ## Running and testing
 
-- Link `addons/dot_core` once ([development setup](../../docs/development-setup.md)), then the family's two steps ([family CLAUDE.md](../../CLAUDE.md#validating-anything)) and `timeout 180 godot --headless --path . res://examples/vehicle_selftest.tscn`. Exits non-zero on failure.
+- Link `addons/gs_core` once ([development setup](../../docs/development-setup.md)), then the family's two steps ([family CLAUDE.md](../../CLAUDE.md#validating-anything)) and `timeout 180 godot --headless --path . res://examples/vehicle_selftest.tscn`. Exits non-zero on failure.
 - Assert a direction, never only that something moved: a car that drives backwards travels as far as one that does not. [driving](docs/driving.md#two-measured-facts-about-godots-vehicle)
 - Tests that build colliders need their own patch of world and a frame between them (`queue_free` is deferred). [history](docs/history.md)
 - Consumers: game-playlot (adopted cars), mg-buses-from-hell (the buses), mg-smash-copter (a game chassis), mg-dangerous-delivery (a truck bound without the seat handover, its own `DdDrivetrain`). mg-wipeout links the addon and drives nothing. Run the ones a change touches.

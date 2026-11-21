@@ -30,7 +30,7 @@ func _ready() -> void:
 
 
 func _run() -> void:
-	print("dot-vehicle self-test")
+	print("gs-vehicle self-test")
 	print("")
 
 	_world = Node3D.new()
@@ -367,7 +367,7 @@ func _test_spawning() -> void:
 	_check(
 		jeep.body().mass == 800.0,
 		"and the tunables' mass is written ONTO the body",
-		"dot-props' bug: a catalogue saying one thing over a scene saying another"
+		"gs-props' bug: a catalogue saying one thing over a scene saying another"
 	)
 
 	_check(spawner.spawn(&"nothing", Vector3.ZERO) == null, "an unknown id is refused")

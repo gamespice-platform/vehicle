@@ -12,7 +12,7 @@ extends RefCounted
 ##
 ## [b]A delivered chassis extends this by PATH, never by name.[/b] A script inside a
 ## mounted GameSpice Cloud pack cannot resolve a [code]class_name[/code] —
-## [code]extends "res://addons/dot_vehicle/runtime/dot_vehicle_chassis.gd"[/code] works
+## [code]extends "res://addons/gs_vehicle/runtime/gs_vehicle_chassis.gd"[/code] works
 ## in a build and in a pack, and [code]extends GSVehicleChassis[/code] works in a build
 ## only.
 ##

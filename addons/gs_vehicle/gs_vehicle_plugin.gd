@@ -6,13 +6,13 @@ extends EditorPlugin
 ## No autoloads. A server running two worlds in one process holds two spawners, each
 ## with its own vehicle budget.
 
-const _ICON := "res://addons/dot_vehicle/icon_placeholder.svg"
+const _ICON := "res://addons/gs_vehicle/icon_placeholder.svg"
 
 const _TYPES := [
 	[
 		"GSVehicleSpawner",
 		"Node",
-		"res://addons/dot_vehicle/runtime/dot_vehicle_spawner.gd",
+		"res://addons/gs_vehicle/runtime/gs_vehicle_spawner.gd",
 	],
 ]
 

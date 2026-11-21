@@ -127,7 +127,7 @@ func _test_rider_freed_aboard() -> void:
 ## Every file that asks the physics space a question. A new one fails here until it is added and
 ## listed in GameSpice Physics docs/threading.md, because with physics on its own thread each caller
 ## must run inside the physics step.
-const QUERY_FILES: Array[String] = ["runtime/dot_vehicle_hover.gd", "runtime/dot_vehicle_ride.gd"]
+const QUERY_FILES: Array[String] = ["runtime/gs_vehicle_hover.gd", "runtime/gs_vehicle_ride.gd"]
 const QUERY_NEEDLES: Array[String] = ["direct_space_state", "space.intersect_", "space.cast_motion(", "space.get_rest_info("]
 const TICK_ENTRY_NEEDLES: Array[String] = ["func _process(", "func _input(", "func _unhandled_input(", "call_deferred(", "await "]
 
@@ -196,7 +196,7 @@ func _test_deferred_queries() -> void:
 func _test_space_query_audit() -> void:
 	_section("space-query audit")
 	var scripts: Array[String] = []
-	_audit_scripts("res://addons/dot_vehicle", scripts)
+	_audit_scripts("res://addons/gs_vehicle", scripts)
 	var found: Array[String] = []
 	var in_tick_entry: Array[String] = []
 
@@ -208,7 +208,7 @@ func _test_space_query_audit() -> void:
 				queries = true
 		if not queries:
 			continue
-		var rel := path.trim_prefix("res://addons/dot_vehicle/")
+		var rel := path.trim_prefix("res://addons/gs_vehicle/")
 		found.append(rel)
 		for n in TICK_ENTRY_NEEDLES:
 			if text.contains(n):
@@ -220,5 +220,5 @@ func _test_space_query_audit() -> void:
 	_check(scripts.size() > 5, "the audit found the addon's scripts")
 	_check(found == expected, "the files that query the space are exactly the documented ones", str(found))
 	_check(in_tick_entry.is_empty(), "no querying file has a frame, input, deferred or awaited entry point", str(in_tick_entry))
-	_check(FileAccess.get_file_as_string("res://addons/dot_vehicle/runtime/dot_vehicle_spawner.gd").contains("func _process(") == false, "the spawner that drives and exits vehicles has no frame callback")
+	_check(FileAccess.get_file_as_string("res://addons/gs_vehicle/runtime/gs_vehicle_spawner.gd").contains("func _process(") == false, "the spawner that drives and exits vehicles has no frame callback")
 	_done()

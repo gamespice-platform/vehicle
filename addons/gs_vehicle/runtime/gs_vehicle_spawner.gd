@@ -1,6 +1,6 @@
 @tool
 class_name GSVehicleSpawner
-extends "dot_vehicle_lookup.gd"
+extends "gs_vehicle_lookup.gd"
 
 ## Spawns, drives, seats and removes vehicles. The node a game with vehicles adds.
 ##
@@ -55,7 +55,7 @@ const REASON_ADMIN := &"admin"
 
 ## Set in [member GSVehicleInstance.meta] on a vehicle whose node came from
 ## [method adopt] rather than from [method spawn].
-const META_ADOPTED := &"dot_vehicle_adopted"
+const META_ADOPTED := &"gs_vehicle_adopted"
 
 @export_group("Content")
 
@@ -436,7 +436,7 @@ func attach_chassis(vehicle: GSVehicleInstance) -> GSResult:
 		if not (made is GSVehicleChassis):
 			return GSResult.fail(
 				GSError.CODE_INVALID,
-				"A chassis must extend dot_vehicle_chassis.gd.",
+				"A chassis must extend gs_vehicle_chassis.gd.",
 				def.chassis_script_path
 			)
 

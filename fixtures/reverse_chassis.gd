@@ -1,4 +1,4 @@
-extends "res://addons/dot_vehicle/runtime/dot_vehicle_chassis.gd"
+extends "res://addons/gs_vehicle/runtime/gs_vehicle_chassis.gd"
 
 ## A chassis for the self-test: drives backwards, and counts its ticks.
 ##

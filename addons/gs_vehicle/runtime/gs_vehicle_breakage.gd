@@ -374,8 +374,8 @@ func _set_wheel(i: int, _e: Dictionary) -> void:
 			wheel.wheel_radius = _radius[i] * damage.popped_radius
 		GSVehicleDamage.Wheel.LOST:
 			wheel.wheel_radius = _radius[i] * damage.hub_radius
-			if not wheel.has_meta(&"dot_breakage_traction"):
-				wheel.set_meta(&"dot_breakage_traction", wheel.use_as_traction)
+			if not wheel.has_meta(&"gs_breakage_traction"):
+				wheel.set_meta(&"gs_breakage_traction", wheel.use_as_traction)
 			wheel.use_as_traction = false
 		_:
 			wheel.wheel_radius = _radius[i]
@@ -388,9 +388,9 @@ func _set_wheel(i: int, _e: Dictionary) -> void:
 	# The drawn tyre goes down with the radius.
 	for child in wheel.get_children():
 		if child is Node3D:
-			if not child.has_meta(&"dot_breakage_scale"):
-				child.set_meta(&"dot_breakage_scale", (child as Node3D).scale)
-			var base: Vector3 = child.get_meta(&"dot_breakage_scale")
+			if not child.has_meta(&"gs_breakage_scale"):
+				child.set_meta(&"gs_breakage_scale", (child as Node3D).scale)
+			var base: Vector3 = child.get_meta(&"gs_breakage_scale")
 			(child as Node3D).scale = base * (damage.popped_radius if state == GSVehicleDamage.Wheel.POPPED else 1.0 - 0.1 * damage.wear_of(i))
 
 
@@ -425,8 +425,8 @@ func _restore_all() -> void:
 	for i in _wheels.size():
 		var wheel := _wheels[i]
 		_set_wheel(i, {})
-		wheel.use_as_traction = bool(wheel.get_meta(&"dot_breakage_traction", wheel.use_as_traction))
-		wheel.remove_meta(&"dot_breakage_traction")
+		wheel.use_as_traction = bool(wheel.get_meta(&"gs_breakage_traction", wheel.use_as_traction))
+		wheel.remove_meta(&"gs_breakage_traction")
 		for child in wheel.get_children():
 			if child is Node3D:
 				(child as Node3D).visible = true

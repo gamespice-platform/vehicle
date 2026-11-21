@@ -2,7 +2,7 @@
 
 ## Server-authoritative, and not predicted
 
-The same decision dot-props and dot-npc make, and here it costs the most: it is the **driver's own input** going round trip, which is exactly what prediction exists to hide. It was considered properly and rejected anyway.
+The same decision gs-props and gs-npc make, and here it costs the most: it is the **driver's own input** going round trip, which is exactly what prediction exists to hide. It was considered properly and rejected anyway.
 
 A vehicle is a rigid body with a contact solver under it. Iteration order, island membership and the last bits of every float differ between two machines, so two runs of the same drive diverge in a second or two. A predicted vehicle is therefore a corrected vehicle, and a correction on something a player is steering reads far worse than latency does: latency is a delay, and a correction is the vehicle moving somewhere the player did not put it.
 
@@ -61,7 +61,7 @@ What is **not** already there is the part `GSVehicleWheeled` is: wheel propertie
 
 `GSVehicleDriver` reads a position, a heading and a velocity and returns throttle, steer and brake. It knows nothing about physics and nothing about the world, deliberately three times over: it is testable with no physics server, it works for a chassis this addon has never seen, and it cannot quietly become a second place where driving is simulated.
 
-**It does not path.** Give it a route (from dot-npc's graph, from a spline, from four points in a config file) and it follows it. Deciding where to go would make this addon depend on a navigation one.
+**It does not path.** Give it a route (from gs-npc's graph, from a spline, from four points in a config file) and it follows it. Deciding where to go would make this addon depend on a navigation one.
 
 - **The steering angle is computed in the vehicle's own basis**, not as a world yaw. A world yaw is the wrong question on anything that pitches or rolls, and a vehicle on a hillside pitches. `+1` steers right (`GSVehicleCommand`'s convention).
 - **It brakes for corners rather than lifting off.** A driver that only lifts enters every corner at whatever speed the straight left it at, and understeers off the road.

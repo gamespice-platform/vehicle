@@ -212,9 +212,9 @@ func _keep(body: RigidBody3D) -> void:
 
 ## The scale a child had when it was thrown, so the fade shrinks from there.
 func _base_scale(child: Node) -> float:
-	if not child.has_meta(&"dot_debris_scale"):
-		child.set_meta(&"dot_debris_scale", (child as Node3D).scale.x)
-	return float(child.get_meta(&"dot_debris_scale"))
+	if not child.has_meta(&"gs_debris_scale"):
+		child.set_meta(&"gs_debris_scale", (child as Node3D).scale.x)
+	return float(child.get_meta(&"gs_debris_scale"))
 
 
 ## The box round [param node]'s meshes, in its own frame (scaled meshes included).
