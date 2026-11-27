@@ -2,6 +2,8 @@
 
 Vehicles for Godot 4: a catalogue of definitions, handling as layered configuration, seats as data, and a safe handover when a player gets in or out. Add it when players should be able to drive somewhere rather than only walk.
 
+GameSpice addon, MIT licensed, built with Claude Code. `examples/vehicle_selftest.tscn` is the headless test. Several games in [Zee's Games](https://zeesgames.com) put players in vehicles with it, on live servers built from GameSpice addons. Bug reports go to the [issue tracker](https://github.com/gamespice-platform/vehicle/issues).
+
 ## Install
 
 1. Get [Godot 4.7](https://godotengine.org/download).
@@ -85,8 +87,18 @@ It steers in the vehicle's own frame, brakes for corners, slows towards the last
 
 Import the project once, then run `examples/vehicle_selftest.tscn` headless with Godot. It exits non-zero on failure.
 
-## Status and licence
+## Used by
 
-Part of the [**GameSpice**](https://gamespice.net) platform: a family of Godot addons. Written with Claude Code and maintained by `gamemann`. Every addon has headless tests, but little of this has been played by real users yet, so expect rough edges and please [open an issue](https://github.com/gamespice-platform/vehicle/issues) when you hit one.
+These games from Zee's Games vendor this addon:
+
+- [Playlot](https://zeesgames.com/playlot) - spawnable vehicles with seats and network sync
+- [Buses From Hell](https://zeesgames.com/buses-from-hell) - the buses, with seats, commands and network sync
+- [Smash Copter](https://zeesgames.com/smash-copter) - the copter, with its seat and network sync
+- [Wipeout](https://zeesgames.com/wipeout) - network sync for the props on the course
+- [Dangerous Delivery](https://zeesgames.com/dangerous-delivery) - the trucks: driver, commands, damage and debris
+
+The whole collection is at [zeesgames.com](https://zeesgames.com).
+
+## Licence
 
 MIT licence, see [LICENSE](LICENSE). The only closed part of the [**GameSpice**](https://gamespice.net) platform is the web back end; you can use your own instead of GameSpice's.
