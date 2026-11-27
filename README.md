@@ -89,7 +89,11 @@ Import the project once, then run `examples/vehicle_selftest.tscn` headless with
 
 ## Used by
 
-These games from Zee's Games vendor this addon:
+### Zee's Games
+
+Zee's Games is a collection of games I made on GameSpice, for demonstration and for fun. They show what the platform can do, and they run on live servers you can join. Anybody can create games on GameSpice, and each addon is its own repository and can be used separately from the games and from the rest of GameSpice.
+
+These games vendor this addon:
 
 - [Playlot](https://zeesgames.com/playlot) - spawnable vehicles with seats and network sync
 - [Buses From Hell](https://zeesgames.com/buses-from-hell) - the buses, with seats, commands and network sync
