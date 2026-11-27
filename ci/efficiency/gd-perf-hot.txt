@@ -1,0 +1,31 @@
+# Runtime scripts checked by gs-ci scripts/check-gd-perf.py (tools/gd_perf_lint.py).
+# One fnmatch glob per line over tracked paths. Baseline: ci/efficiency/gd-perf.tsv.
+addons/gs_vehicle/core/gs_road_profile.gd
+addons/gs_vehicle/core/gs_vehicle_catalogue.gd
+addons/gs_vehicle/core/gs_vehicle_command.gd
+addons/gs_vehicle/core/gs_vehicle_damage.gd
+addons/gs_vehicle/core/gs_vehicle_def.gd
+addons/gs_vehicle/core/gs_vehicle_instance.gd
+addons/gs_vehicle/core/gs_vehicle_seat.gd
+addons/gs_vehicle/core/gs_vehicle_tunables.gd
+addons/gs_vehicle/gs_vehicle_api.gd
+addons/gs_vehicle/net/gs_vehicle_net_sync.gd
+addons/gs_vehicle/runtime/gs_vehicle_breakage.gd
+addons/gs_vehicle/runtime/gs_vehicle_chassis.gd
+addons/gs_vehicle/runtime/gs_vehicle_debris.gd
+addons/gs_vehicle/runtime/gs_vehicle_driver.gd
+addons/gs_vehicle/runtime/gs_vehicle_explosion.gd
+addons/gs_vehicle/runtime/gs_vehicle_hover.gd
+addons/gs_vehicle/runtime/gs_vehicle_lookup.gd
+addons/gs_vehicle/runtime/gs_vehicle_ride.gd
+addons/gs_vehicle/runtime/gs_vehicle_spawner.gd
+addons/gs_vehicle/runtime/gs_vehicle_spray.gd
+addons/gs_vehicle/runtime/gs_vehicle_wheeled.gd
+addons/gs_vehicle/runtime/gs_vehicle_wreck.gd
+
+# Run once or on config change, not per tick:
+cold+: ^(from_.*|describe.*|specs|cvar_specs|_absorb_specs|set_cvar|follow_cvars|validate.*|presets|properties|standard_pair|restore|_restore_.*|to_config|parse_.*|_parse_.*|find_spot)$
+
+# Run per event (a hit, a lost part, a crash, a spawn/exit/destroy, wire and catalogue conversion,
+# effect ramps built once, tool-time road checks), not per tick:
+cold+: ^(to_dictionary|to_dict|apply_dict|apply_state|hit|hit_wheel|lose_part|_lose_part|lose_wheel|lost_parts|pop|crash|explode|_plume|_throw_copy|_throw_wheel|_show|_set_wheel|_feel|_on_.*|_evacuate|destroy|remove|may_spawn|_run_deferred|_unbind|set_target|state_name|check_camber|half_slopes|categories|in_category|search|seating_at_least|driver_seats|carve|_body|_bounds|_fire_ramp|_smoke_ramp|_spark_ramp|_exclusions|_eject|_pick_handbrake_wheels|all_vehicles|vehicles_of)$

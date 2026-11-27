@@ -32,6 +32,10 @@ var ground_mask: int = 1
 ## Where the springs push from, in body space. Four corners by default.
 var _mounts: Array[Vector3] = []
 
+## One ray query for every mount and tick; its exclude list is rebuilt only when the body changes.
+var _query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
+var _query_body: RID = RID()
+
 
 func _setup() -> GSResult:
 	var body := vehicle.body()
@@ -90,18 +94,23 @@ func _drive(command: GSVehicleCommand, delta: float) -> void:
 	if body == null:
 		return
 
-	var space := body.get_world_3d().direct_space_state
+	var space := body.get_world_3d().direct_space_state  # perf-lint: allow singleton_lookup valid only in this physics step; once per tick, not per ray
 	var transform := body.global_transform
+	var rid := body.get_rid()
+	if rid != _query_body:
+		_query_body = rid
+		_query.exclude = [rid]  # perf-lint: allow alloc only when the body changes
+	_query.collision_mask = ground_mask
 	var grounded := 0
 
 	for mount in _mounts:
 		var from := transform * mount
 		var to := from + Vector3.DOWN * (ride_height * 2.0)
 
-		var query := PhysicsRayQueryParameters3D.create(from, to, ground_mask)
-		query.exclude = [body.get_rid()]
+		_query.from = from
+		_query.to = to
 
-		var hit := space.intersect_ray(query)
+		var hit := space.intersect_ray(_query)
 
 		if hit.is_empty():
 			continue

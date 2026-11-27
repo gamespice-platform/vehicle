@@ -555,6 +555,8 @@ func _is_queued(kind: StringName, instance_id: int) -> bool:
 
 
 func _run_deferred() -> void:
+	if _deferred.is_empty():
+		return  # the usual tick: nothing queued, so no fresh queue either
 	var work := _deferred
 	_deferred = []
 
